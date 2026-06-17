@@ -1,0 +1,24 @@
+﻿[
+  {
+    "scheme_name": "UP Student Scholarship Scheme",
+    "ministry": "Department of Social Welfare",
+    "state": "Uttar Pradesh",
+    "eligibility": {
+      "age_min": 18,
+      "age_max": 25,
+      "gender": null,
+      "income_limit_annual": 200000,
+      "caste_categories": ["SC", "ST", "OBC"],
+      "occupation_categories": ["student"]
+    },
+    "eligibility_text": "Applicant must be a student resident of Uttar Pradesh. Annual family income should be below Rs. 200000. Category SC/ST/OBC. Age 18 to 25 years.",
+    "benefit_amount": "Rs. 12000 annually",
+    "benefit_text": "Financial assistance of Rs. 12000 annually.",
+    "application_url": "https://scholarship.up.gov.in",
+    "application_process": "Apply online with caste, income, and education documents.",
+    "source_pdf_url": "https://example.gov.in/up-student-scholarship.pdf",
+    "source_page_url": "https://example.gov.in/schemes",
+    "local_pdf_path": "data/raw/pdfs/sample.pdf",
+    "raw_text_sha256": "abc123"
+  }
+]

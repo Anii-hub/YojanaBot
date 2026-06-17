@@ -1,0 +1,353 @@
+{% extends "finder/base.html" %}
+{% load static %}
+
+{% block title %}About YojanaBot — Government Scheme Finder{% endblock %}
+{% block meta_description %}Learn how YojanaBot helps you discover Indian government schemes you are eligible for — free, bilingual, and instant.{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light-india min-vh-100">
+  <div class="container">
+
+    <!-- Hero -->
+    <div class="text-center mb-5">
+      <span class="section-eyebrow">Free · Bilingual · Instant</span>
+      <h1 class="section-title">About YojanaBot</h1>
+      <p class="text-muted fs-5 mx-auto" style="max-width:620px">
+        YojanaBot is a free AI-powered tool that helps every Indian citizen discover
+        government schemes they actually qualify for — in English or Hindi.
+      </p>
+    </div>
+
+    <!-- What is it? -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+      <div class="card-body p-4 p-md-5">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="flex-shrink-0 fs-2">🇮🇳</div>
+          <div>
+            <h2 class="h5 fw-bold mb-2">What is YojanaBot?</h2>
+            <p class="text-muted mb-2">
+              India has hundreds of central and state government schemes — for farmers, students,
+              women, senior citizens, differently abled persons, workers, and more.
+              Most people never find out which ones they qualify for because the information
+              is scattered across dozens of websites and PDFs.
+            </p>
+            <p class="text-muted mb-0">
+              YojanaBot solves this. You answer 6 simple questions about yourself,
+              and the tool instantly searches through scheme documents to show you
+              only the schemes you are personally eligible for — with the exact benefit amount
+              and a direct link to apply.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Who is it for -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+      <div class="card-body p-4 p-md-5">
+        <h2 class="h5 fw-bold mb-4 text-center">Who Can Use YojanaBot?</h2>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+              <span class="fs-4">🌾</span>
+              <span class="small fw-semibold text-dark">Farmers and agricultural workers</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+              <span class="fs-4">🎓</span>
+              <span class="small fw-semibold text-dark">Students seeking scholarships</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+              <span class="fs-4">👩‍💼</span>
+              <span class="small fw-semibold text-dark">Women entrepreneurs &amp; self-employed</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+              <span class="fs-4">👴</span>
+              <span class="small fw-semibold text-dark">Senior citizens above 60 years</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+              <span class="fs-4">♿</span>
+              <span class="small fw-semibold text-dark">Differently abled (Divyang) persons</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+              <span class="fs-4">👷</span>
+              <span class="small fw-semibold text-dark">Labourers and unorganised workers</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to use -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+      <div class="card-body p-4 p-md-5">
+        <h2 class="h5 fw-bold mb-4 text-center">How to Use YojanaBot — 3 Simple Steps</h2>
+        <div class="row g-4">
+          <div class="col-md-4 text-center">
+            <div class="step-circle mx-auto mb-3">1</div>
+            <h3 class="h6 fw-bold">Fill Your Profile</h3>
+            <p class="small text-muted mb-0">
+              Enter your state, age, gender, annual family income, caste category,
+              and primary occupation. Takes less than 90 seconds.
+            </p>
+          </div>
+          <div class="col-md-4 text-center">
+            <div class="step-circle mx-auto mb-3">2</div>
+            <h3 class="h6 fw-bold">Choose Your Language</h3>
+            <p class="small text-muted mb-0">
+              Select English or Hindi. All results including scheme names, benefits,
+              and eligibility details will be shown in your chosen language.
+            </p>
+          </div>
+          <div class="col-md-4 text-center">
+            <div class="step-circle mx-auto mb-3">3</div>
+            <h3 class="h6 fw-bold">View &amp; Apply</h3>
+            <p class="small text-muted mb-0">
+              See your matched schemes ranked by relevance. Click
+              <strong>Apply Now</strong> to go directly to the official government portal.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents to keep ready -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+      <div class="card-body p-4 p-md-5">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="flex-shrink-0 fs-2">📋</div>
+          <div class="w-100">
+            <h2 class="h5 fw-bold mb-2">Documents to Keep Ready When Applying</h2>
+            <p class="text-muted small mb-3">
+              Most government schemes require a common set of documents. Having these ready
+              will speed up your application:
+            </p>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Aadhaar Card</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Bank Passbook (with IFSC)</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Income Certificate</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Caste Certificate (if applicable)</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Age Proof (Birth / School Certificate)</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Ration Card</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Passport-size Photographs</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Land Records (for farmer schemes)</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Disability Certificate (for Divyang schemes)</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                  <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                  <span class="small">Domicile / Residence Certificate</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+      <div class="card-body p-4 p-md-5">
+        <h2 class="h5 fw-bold mb-4 text-center">Frequently Asked Questions</h2>
+        <div class="accordion accordion-flush" id="faqAccordion">
+
+          <div class="accordion-item border rounded-3 mb-2">
+            <h3 class="accordion-header">
+              <button class="accordion-button collapsed fw-semibold rounded-3" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#faq1">
+                Is YojanaBot free to use?
+              </button>
+            </h3>
+            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted small">
+                Yes, completely free. There are no charges, no registration, and no subscription required.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item border rounded-3 mb-2">
+            <h3 class="accordion-header">
+              <button class="accordion-button collapsed fw-semibold rounded-3" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#faq2">
+                Is my personal information stored?
+              </button>
+            </h3>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted small">
+                No. Your profile details (age, income, state, etc.) are only used during your session
+                to find matching schemes and are never saved to any database or shared with anyone.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item border rounded-3 mb-2">
+            <h3 class="accordion-header">
+              <button class="accordion-button collapsed fw-semibold rounded-3" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#faq3">
+                Are the results accurate and up to date?
+              </button>
+            </h3>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted small">
+                YojanaBot is based on official government documents and portals. However, scheme
+                eligibility criteria can change. Always verify the final details on the official
+                government website before applying.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item border rounded-3 mb-2">
+            <h3 class="accordion-header">
+              <button class="accordion-button collapsed fw-semibold rounded-3" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#faq4">
+                Which states are covered?
+              </button>
+            </h3>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted small">
+                All 28 states and 8 Union Territories are covered. Central government schemes are
+                available to residents of all states. State-specific schemes (e.g. UP pension schemes,
+                Haryana farmer schemes) are shown only to residents of those states.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item border rounded-3 mb-2">
+            <h3 class="accordion-header">
+              <button class="accordion-button collapsed fw-semibold rounded-3" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#faq5">
+                Can I use YojanaBot in Hindi?
+              </button>
+            </h3>
+            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted small">
+                Yes. On the eligibility form, select <strong>🇮🇳 हिंदी</strong> and the entire form —
+                including all labels, dropdowns, and results — will switch to Hindi. This makes
+                YojanaBot accessible to people who are more comfortable reading Hindi.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item border rounded-3 mb-2">
+            <h3 class="accordion-header">
+              <button class="accordion-button collapsed fw-semibold rounded-3" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#faq6">
+                Does YojanaBot apply on my behalf?
+              </button>
+            </h3>
+            <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted small">
+                No. YojanaBot only helps you <em>discover</em> which schemes you qualify for.
+                The actual application is done by you on the official government portal via the
+                <strong>Apply Now</strong> button on each result card.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacy note -->
+    <div class="card border-0 rounded-4 mb-5" style="background: linear-gradient(135deg, #fff7ed, #fef3c7)">
+      <div class="card-body p-4 d-flex align-items-center gap-3">
+        <i class="bi bi-shield-fill-check fs-2 text-success flex-shrink-0"></i>
+        <div>
+          <h3 class="h6 fw-bold mb-1">Your Privacy is Protected</h3>
+          <p class="small text-muted mb-0">
+            YojanaBot never asks for your name, phone number, Aadhaar number, or any identity document.
+            Only anonymous profile details (age, income range, state, category) are used — and only
+            during your session. Nothing is stored after you close the tab.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center pb-4">
+      <h2 class="h4 fw-bold mb-2">Ready to Find Your Schemes?</h2>
+      <p class="text-muted mb-4">It takes less than 90 seconds and is completely free.</p>
+      <a href="{% url 'finder:find' %}" class="btn btn-saffron btn-lg px-5">
+        <i class="bi bi-stars me-2"></i>Check My Eligibility
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<style>
+.step-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--saffron, #FF9933);
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.accordion-button:not(.collapsed) {
+  background-color: #fff7ed;
+  color: #c2410c;
+  box-shadow: none;
+}
+.accordion-button:focus {
+  box-shadow: none;
+}
+</style>
+{% endblock %}

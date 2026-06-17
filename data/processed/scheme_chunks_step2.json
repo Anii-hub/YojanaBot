@@ -1,0 +1,369 @@
+[
+  {
+    "id": "scheme_pm_kisan_001",
+    "scheme_name": "PM Kisan Samman Nidhi (PM-KISAN)",
+    "page_content": "Scheme Name: PM Kisan Samman Nidhi (PM-KISAN)\nMinistry/Department: Ministry of Agriculture and Farmers Welfare\nState: All India\nEligibility Criteria: All landholding farmers families with cultivable land. Annual family income must be below Rs. 200000. Age 18 to 65 years. Applicable to all caste categories including SC, ST, OBC, General. Farmer or agricultural worker occupation required.\nBenefit Amount: Rs. 6000 per year\nBenefits: Financial benefit of Rs. 6000 per year is provided in three equal installments of Rs. 2000 each every four months directly to the bank accounts of farmer families.\nApplication Process: Farmers can register through the PM-KISAN portal, Common Service Centres or through local Patwari/Revenue Officer. Documents required: Aadhaar card, bank account details, land records.\nApplication URL: https://pmkisan.gov.in\nSource PDF: https://pmkisan.gov.in/documents/pmkisan_guidelines.pdf",
+    "metadata": {
+      "scheme_name": "PM Kisan Samman Nidhi (PM-KISAN)",
+      "ministry": "Ministry of Agriculture and Farmers Welfare",
+      "state": "All India",
+      "age_min": 18,
+      "age_max": 65,
+      "income_limit_annual": 200000,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "farmer",
+      "benefit_amount": "Rs. 6000 per year",
+      "application_url": "https://pmkisan.gov.in",
+      "source_pdf_url": "https://pmkisan.gov.in/documents/pmkisan_guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_up_scholarship_002",
+    "scheme_name": "UP Scholarship Scheme (Pre and Post Matric)",
+    "page_content": "Scheme Name: UP Scholarship Scheme (Pre and Post Matric)\nMinistry/Department: Department of Social Welfare, Government of Uttar Pradesh\nState: Uttar Pradesh\nEligibility Criteria: Student must be a permanent resident of Uttar Pradesh. Annual family income should not exceed Rs. 200000 for OBC and Rs. 250000 for SC and ST categories. Caste categories: SC, ST, OBC students are eligible. Occupation: Student. Age 10 to 25 years. Must be enrolled in a recognized school or college in Uttar Pradesh.\nBenefit Amount: Rs. 3000 to Rs. 12000 per annum\nBenefits: Financial assistance ranging from Rs. 3000 to Rs. 12000 per year depending on class and category. Amount credited directly to bank account.\nApplication Process: Apply online at scholarship.up.gov.in. Documents required: Caste certificate, income certificate, enrollment certificate, Aadhaar card, bank passbook.\nApplication URL: https://scholarship.up.gov.in\nSource PDF: https://scholarship.up.gov.in/docs/scholarship_guidelines.pdf",
+    "metadata": {
+      "scheme_name": "UP Scholarship Scheme (Pre and Post Matric)",
+      "ministry": "Department of Social Welfare, Government of Uttar Pradesh",
+      "state": "Uttar Pradesh",
+      "age_min": 10,
+      "age_max": 25,
+      "income_limit_annual": 250000,
+      "caste_categories_csv": "SC,ST,OBC",
+      "occupation_categories_csv": "student",
+      "benefit_amount": "Rs. 3000 to Rs. 12000 per annum",
+      "application_url": "https://scholarship.up.gov.in",
+      "source_pdf_url": "https://scholarship.up.gov.in/docs/scholarship_guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_pm_awas_gramin_003",
+    "scheme_name": "Pradhan Mantri Awas Yojana - Gramin (PMAY-G)",
+    "page_content": "Scheme Name: Pradhan Mantri Awas Yojana - Gramin (PMAY-G)\nMinistry/Department: Ministry of Rural Development\nState: All India\nEligibility Criteria: Houseless families and families living in kutcha or dilapidated houses in rural areas. Annual family income below Rs. 120000. Beneficiaries identified from SECC-2011 data. Priority to SC, ST, minorities, and differently abled persons. No existing pucca house should be owned by any family member. Age 18 years and above.\nBenefit Amount: Rs. 1.20 lakh to Rs. 1.30 lakh\nBenefits: Financial assistance of Rs. 1.20 lakh in plain areas and Rs. 1.30 lakh in hilly/difficult areas for construction of a pucca house with basic amenities. Convergence with MGNREGS for 90-95 days of unskilled labour.\nApplication Process: Beneficiaries are selected based on SECC-2011 data. Contact local Gram Panchayat or Block Development Office. Apply through AwaasSoft portal or Awaas App.\nApplication URL: https://pmayg.nic.in\nSource PDF: https://pmayg.nic.in/netiay/Shared/Documents/PMAY_G_Guidelines.pdf",
+    "metadata": {
+      "scheme_name": "Pradhan Mantri Awas Yojana - Gramin (PMAY-G)",
+      "ministry": "Ministry of Rural Development",
+      "state": "All India",
+      "age_min": 18,
+      "income_limit_annual": 120000,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "worker,farmer,other",
+      "benefit_amount": "Rs. 1.20 lakh to Rs. 1.30 lakh",
+      "application_url": "https://pmayg.nic.in",
+      "source_pdf_url": "https://pmayg.nic.in/netiay/Shared/Documents/PMAY_G_Guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_pm_mudra_004",
+    "scheme_name": "Pradhan Mantri MUDRA Yojana (PMMY)",
+    "page_content": "Scheme Name: Pradhan Mantri MUDRA Yojana (PMMY)\nMinistry/Department: Ministry of Finance\nState: All India\nEligibility Criteria: Any Indian citizen who has a business plan for non-farm income generating activity such as manufacturing, processing, trading or service sector. Women entrepreneurs, SC, ST, OBC applicants given priority. Age 18 to 65 years. No income limit. Loan amount up to Rs. 10 lakh. Occupation: woman entrepreneur, worker, farmer, self-employed.\nBenefit Amount: Loan up to Rs. 10 lakh\nBenefits: Three categories: Shishu (up to Rs. 50000), Kishore (Rs. 50001 to Rs. 5 lakh), Tarun (Rs. 5 lakh to Rs. 10 lakh). No collateral required for Shishu and Kishore loans. Subsidized interest rates.\nApplication Process: Apply through any scheduled commercial bank, regional rural bank, microfinance institution or NBFC. Submit business plan, identity proof, address proof. Apply online at mudra.org.in or visit nearest bank.\nApplication URL: https://www.mudra.org.in\nSource PDF: https://www.mudra.org.in/content/mudra-yojana-guidelines.pdf",
+    "metadata": {
+      "scheme_name": "Pradhan Mantri MUDRA Yojana (PMMY)",
+      "ministry": "Ministry of Finance",
+      "state": "All India",
+      "age_min": 18,
+      "age_max": 65,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "woman entrepreneur,worker,farmer",
+      "benefit_amount": "Loan up to Rs. 10 lakh",
+      "application_url": "https://www.mudra.org.in",
+      "source_pdf_url": "https://www.mudra.org.in/content/mudra-yojana-guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_ignoaps_005",
+    "scheme_name": "Indira Gandhi National Old Age Pension Scheme (IGNOAPS)",
+    "page_content": "Scheme Name: Indira Gandhi National Old Age Pension Scheme (IGNOAPS)\nMinistry/Department: Ministry of Rural Development\nState: All India\nEligibility Criteria: Senior citizens aged 60 years and above belonging to Below Poverty Line (BPL) households. Annual family income below Rs. 100000. All caste categories: SC, ST, OBC, General, Minority. Occupation: Senior citizen. Must be a resident of India.\nBenefit Amount: Rs. 200 to Rs. 500 per month\nBenefits: Monthly pension of Rs. 200 for persons aged 60 to 79 years and Rs. 500 for persons aged 80 years and above. State governments may provide additional top-up amounts.\nApplication Process: Apply through local Gram Panchayat or Urban Local Body. Submit age proof, BPL card/income certificate, Aadhaar, bank account details. State governments manage actual implementation.\nApplication URL: https://nsap.nic.in\nSource PDF: https://nsap.nic.in/Documents/ignoaps_guidelines.pdf",
+    "metadata": {
+      "scheme_name": "Indira Gandhi National Old Age Pension Scheme (IGNOAPS)",
+      "ministry": "Ministry of Rural Development",
+      "state": "All India",
+      "age_min": 60,
+      "income_limit_annual": 100000,
+      "gender": null,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "senior citizen",
+      "benefit_amount": "Rs. 200 to Rs. 500 per month",
+      "application_url": "https://nsap.nic.in",
+      "source_pdf_url": "https://nsap.nic.in/Documents/ignoaps_guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_standup_india_006",
+    "scheme_name": "Stand-Up India Scheme",
+    "page_content": "Scheme Name: Stand-Up India Scheme\nMinistry/Department: Ministry of Finance, Department of Financial Services\nState: All India\nEligibility Criteria: SC, ST borrowers and women entrepreneurs setting up greenfield enterprises. Age 18 years and above. Occupation: woman entrepreneur. The enterprise must be in manufacturing, services or trading sector. At least 51% shareholding by SC/ST or woman entrepreneur. Annual income no restriction.\nBenefit Amount: Loan Rs. 10 lakh to Rs. 1 crore\nBenefits: Bank loans between Rs. 10 lakh and Rs. 1 crore for setting up greenfield enterprises. Composite loan including term loan and working capital. At least one SC/ST borrower and one woman borrower per bank branch.\nApplication Process: Apply through any scheduled commercial bank branch or through www.standupmitra.in portal. Documents: business plan, identity proof, address proof, caste/category certificate.\nApplication URL: https://www.standupmitra.in\nSource PDF: https://www.standupmitra.in/Home/SumiFiles/standup_guidelines.pdf",
+    "metadata": {
+      "scheme_name": "Stand-Up India Scheme",
+      "ministry": "Ministry of Finance",
+      "state": "All India",
+      "age_min": 18,
+      "gender": "female",
+      "caste_categories_csv": "SC,ST",
+      "occupation_categories_csv": "woman entrepreneur",
+      "benefit_amount": "Loan Rs. 10 lakh to Rs. 1 crore",
+      "application_url": "https://www.standupmitra.in",
+      "source_pdf_url": "https://www.standupmitra.in/Home/SumiFiles/standup_guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_ayushman_bharat_007",
+    "scheme_name": "Ayushman Bharat PM-JAY (Pradhan Mantri Jan Arogya Yojana)",
+    "page_content": "Scheme Name: Ayushman Bharat PM-JAY (Pradhan Mantri Jan Arogya Yojana)\nMinistry/Department: Ministry of Health and Family Welfare\nState: All India\nEligibility Criteria: Families identified as poor and vulnerable based on SECC-2011 database. Annual family income below Rs. 100000. Priority to SC, ST, OBC categories. Workers, farmers, labourers eligible. All age groups. No restriction on family size.\nBenefit Amount: Health cover Rs. 5 lakh per family per year\nBenefits: Health cover of Rs. 5 lakh per family per year for secondary and tertiary care hospitalization. Covers pre and post-hospitalization expenses. Cashless and paperless access to healthcare services at empanelled hospitals across India.\nApplication Process: Check eligibility at pmjay.gov.in or call 14555. Visit nearest empanelled hospital or Common Service Centre with Aadhaar card. No need to apply separately if family is in SECC list.\nApplication URL: https://pmjay.gov.in\nSource PDF: https://pmjay.gov.in/sites/default/files/2018-09/PM-JAY_Guidelines.pdf",
+    "metadata": {
+      "scheme_name": "Ayushman Bharat PM-JAY (Pradhan Mantri Jan Arogya Yojana)",
+      "ministry": "Ministry of Health and Family Welfare",
+      "state": "All India",
+      "income_limit_annual": 100000,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "farmer,worker,other",
+      "benefit_amount": "Health cover Rs. 5 lakh per family per year",
+      "application_url": "https://pmjay.gov.in",
+      "source_pdf_url": "https://pmjay.gov.in/sites/default/files/2018-09/PM-JAY_Guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_pm_fasal_bima_008",
+    "scheme_name": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+    "page_content": "Scheme Name: Pradhan Mantri Fasal Bima Yojana (PMFBY)\nMinistry/Department: Ministry of Agriculture and Farmers Welfare\nState: All India\nEligibility Criteria: All farmers growing notified crops in notified areas. Applicable to farmers of all caste categories - SC, ST, OBC, General. Farmer occupation required. Age 18 years and above. Both loanee and non-loanee farmers can apply. Annual income no restriction.\nBenefit Amount: Crop insurance cover as per sum insured\nBenefits: Financial support to farmers suffering crop loss/damage due to unforeseen events. Premium as low as 1.5% for Rabi crops, 2% for Kharif crops, 5% for commercial/horticultural crops. Rest of premium paid by Central and State governments.\nApplication Process: Loanee farmers: enrolled automatically by bank. Non-loanee farmers: apply at nearest bank, insurance company office or Common Service Centre before cut-off date. Documents: land records, bank account details, Aadhaar.\nApplication URL: https://pmfby.gov.in\nSource PDF: https://pmfby.gov.in/pdf/OM_PMFBY_English.pdf",
+    "metadata": {
+      "scheme_name": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+      "ministry": "Ministry of Agriculture and Farmers Welfare",
+      "state": "All India",
+      "age_min": 18,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "farmer",
+      "benefit_amount": "Crop insurance cover",
+      "application_url": "https://pmfby.gov.in",
+      "source_pdf_url": "https://pmfby.gov.in/pdf/OM_PMFBY_English.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_nhfdc_divyang_009",
+    "scheme_name": "NHFDC Loan Scheme for Persons with Disabilities",
+    "page_content": "Scheme Name: NHFDC Loan Scheme for Persons with Disabilities\nMinistry/Department: Department of Empowerment of Persons with Disabilities, Ministry of Social Justice\nState: All India\nEligibility Criteria: Persons with disabilities (differently abled/divyang) with at least 40% disability. Age 18 to 55 years. Annual family income below Rs. 300000 for general category and Rs. 500000 for SC/ST. All caste categories eligible. Occupation: differently abled, worker, student, self-employed.\nBenefit Amount: Loan up to Rs. 30 lakh at concessional rates\nBenefits: Concessional loans at 2% to 5% interest rate for self-employment and livelihood activities. Loan amount up to Rs. 30 lakh. Grant assistance also available for skill development.\nApplication Process: Apply through State Channelising Agencies (SCAs) or District Disability Rehabilitation Centres. Documents: disability certificate, income certificate, Aadhaar, bank account details, project report.\nApplication URL: https://www.nhfdc.nic.in\nSource PDF: https://www.nhfdc.nic.in/pdf/NHFDC_Guidelines.pdf",
+    "metadata": {
+      "scheme_name": "NHFDC Loan Scheme for Persons with Disabilities",
+      "ministry": "Department of Empowerment of Persons with Disabilities",
+      "state": "All India",
+      "age_min": 18,
+      "age_max": 55,
+      "income_limit_annual": 500000,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "differently abled",
+      "benefit_amount": "Loan up to Rs. 30 lakh at concessional rates",
+      "application_url": "https://www.nhfdc.nic.in",
+      "source_pdf_url": "https://www.nhfdc.nic.in/pdf/NHFDC_Guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_kisan_credit_card_010",
+    "scheme_name": "Kisan Credit Card (KCC) Scheme",
+    "page_content": "Scheme Name: Kisan Credit Card (KCC) Scheme\nMinistry/Department: Ministry of Agriculture and Farmers Welfare\nState: All India\nEligibility Criteria: All farmers including small, marginal, share croppers, oral lessees and tenant farmers. Age 18 to 75 years. All caste categories: SC, ST, OBC, General. Farmer occupation. Annual income no upper limit. Must have agricultural land or be engaged in farming activity.\nBenefit Amount: Credit limit based on land holding and crop\nBenefits: Short term credit needs for crop cultivation, post-harvest expenses, produce marketing and allied activities. Interest rate as low as 4% per annum after interest subvention. Credit limit up to Rs. 3 lakh at subsidized rates.\nApplication Process: Apply at nearest bank branch, Regional Rural Bank or Cooperative bank. Documents: land records, identity proof, address proof, Aadhaar, passport-size photograph.\nApplication URL: https://www.nabard.org/content1.aspx?id=568\nSource PDF: https://www.nabard.org/auth/writereaddata/File/KCC_REVISED_GUIDELINES.pdf",
+    "metadata": {
+      "scheme_name": "Kisan Credit Card (KCC) Scheme",
+      "ministry": "Ministry of Agriculture and Farmers Welfare",
+      "state": "All India",
+      "age_min": 18,
+      "age_max": 75,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "farmer",
+      "benefit_amount": "Credit limit based on land holding",
+      "application_url": "https://www.nabard.org/content1.aspx?id=568",
+      "source_pdf_url": "https://www.nabard.org/auth/writereaddata/File/KCC_REVISED_GUIDELINES.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_eshram_011",
+    "scheme_name": "e-Shram Portal — National Database of Unorganised Workers",
+    "page_content": "Scheme Name: e-Shram Portal — National Database of Unorganised Workers\nMinistry/Department: Ministry of Labour and Employment\nState: All India\nEligibility Criteria: Unorganised workers aged 16 to 59 years. Workers including construction workers, migrant workers, street vendors, domestic workers, agricultural labourers, fishermen etc. All caste categories: SC, ST, OBC, General, Minority. Annual income below Rs. 200000. Not an income tax payee. Not a member of EPFO or ESIC.\nBenefit Amount: Accident insurance Rs. 2 lakh\nBenefits: Unique Universal Account Number (UAN) that is portable. Accident insurance cover of Rs. 2 lakh. Access to all social security schemes of government. Priority in government welfare schemes.\nApplication Process: Register at eshram.gov.in or through Common Service Centres. Documents: Aadhaar card linked to mobile number, bank account details.\nApplication URL: https://eshram.gov.in\nSource PDF: https://eshram.gov.in/content/uploads/2021/08/eSHRAM-FAQs-English.pdf",
+    "metadata": {
+      "scheme_name": "e-Shram Portal — National Database of Unorganised Workers",
+      "ministry": "Ministry of Labour and Employment",
+      "state": "All India",
+      "age_min": 16,
+      "age_max": 59,
+      "income_limit_annual": 200000,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "worker,farmer",
+      "benefit_amount": "Accident insurance Rs. 2 lakh",
+      "application_url": "https://eshram.gov.in",
+      "source_pdf_url": "https://eshram.gov.in/content/uploads/2021/08/eSHRAM-FAQs-English.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_up_vridha_pension_012",
+    "scheme_name": "UP Vridha Pension Yojana (Old Age Pension Uttar Pradesh)",
+    "page_content": "Scheme Name: UP Vridha Pension Yojana (Old Age Pension Uttar Pradesh)\nMinistry/Department: Department of Social Welfare, Uttar Pradesh Government\nState: Uttar Pradesh\nEligibility Criteria: Persons aged 60 years and above who are permanent residents of Uttar Pradesh. Annual family income should not exceed Rs. 46080 in rural areas and Rs. 56460 in urban areas. All caste categories including SC, ST, OBC, General, Minority. Occupation: senior citizen, other.\nBenefit Amount: Rs. 1000 per month\nBenefits: Monthly pension of Rs. 1000 directly credited to bank account. Amount enhanced periodically by state government.\nApplication Process: Apply online at sspy-up.gov.in or through Jan Seva Kendras. Documents: age proof, income certificate, Aadhaar card, bank passbook, domicile certificate.\nApplication URL: https://sspy-up.gov.in\nSource PDF: https://sspy-up.gov.in/HindiPages/oldagepension.aspx",
+    "metadata": {
+      "scheme_name": "UP Vridha Pension Yojana (Old Age Pension Uttar Pradesh)",
+      "ministry": "Department of Social Welfare, Uttar Pradesh Government",
+      "state": "Uttar Pradesh",
+      "age_min": 60,
+      "income_limit_annual": 56460,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "senior citizen,other",
+      "benefit_amount": "Rs. 1000 per month",
+      "application_url": "https://sspy-up.gov.in",
+      "source_pdf_url": "https://sspy-up.gov.in/HindiPages/oldagepension.aspx",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_haryana_kisan_pension_013",
+    "scheme_name": "Haryana Mukhyamantri Kisan Evam Khetihar Mazdoor Jeevan Suraksha Yojana",
+    "page_content": "Scheme Name: Haryana Mukhyamantri Kisan Evam Khetihar Mazdoor Jeevan Suraksha Yojana\nMinistry/Department: Agriculture Department, Haryana Government\nState: Haryana\nEligibility Criteria: Farmers and agricultural workers of Haryana who meet with accident during farming operations. Age 10 to 65 years. All caste categories: SC, ST, OBC, General. Occupation: farmer, worker, agricultural labourer.\nBenefit Amount: Compensation up to Rs. 5 lakh\nBenefits: Compensation of Rs. 5 lakh in case of death or permanent disability due to farming accident. Rs. 2.5 lakh for partial disability. Medical reimbursement up to Rs. 1 lakh.\nApplication Process: Register at agriharyana.gov.in. Submit FIR or accident report, medical documents, bank account details within 30 days of accident.\nApplication URL: https://agriharyana.gov.in\nSource PDF: https://agriharyana.gov.in/Documents/Kisan_Suraksha_Yojana.pdf",
+    "metadata": {
+      "scheme_name": "Haryana Mukhyamantri Kisan Evam Khetihar Mazdoor Jeevan Suraksha Yojana",
+      "ministry": "Agriculture Department, Haryana Government",
+      "state": "Haryana",
+      "age_min": 10,
+      "age_max": 65,
+      "caste_categories_csv": "SC,ST,OBC,General",
+      "occupation_categories_csv": "farmer,worker",
+      "benefit_amount": "Compensation up to Rs. 5 lakh",
+      "application_url": "https://agriharyana.gov.in",
+      "source_pdf_url": "https://agriharyana.gov.in/Documents/Kisan_Suraksha_Yojana.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_post_matric_sc_014",
+    "scheme_name": "Post Matric Scholarship Scheme for SC Students",
+    "page_content": "Scheme Name: Post Matric Scholarship Scheme for SC Students\nMinistry/Department: Ministry of Social Justice and Empowerment\nState: All India\nEligibility Criteria: Scheduled Caste (SC) students studying at post matriculation or post secondary stage. Annual parental income should not exceed Rs. 250000. Caste category: SC only. Occupation: student. Age 14 to 30 years. Must be studying in a recognized institution.\nBenefit Amount: Rs. 1200 to Rs. 9000 per annum\nBenefits: Scholarship ranging from Rs. 1200 to Rs. 9000 per year depending on course level. Additional maintenance allowance. Readers allowance for blind students.\nApplication Process: Apply through National Scholarship Portal at scholarships.gov.in or through state scholarship portals. Documents: caste certificate, income certificate, Aadhaar, enrollment certificate, bank account.\nApplication URL: https://scholarships.gov.in\nSource PDF: https://scholarships.gov.in/docs/PostMatric_SC_guidelines.pdf",
+    "metadata": {
+      "scheme_name": "Post Matric Scholarship Scheme for SC Students",
+      "ministry": "Ministry of Social Justice and Empowerment",
+      "state": "All India",
+      "age_min": 14,
+      "age_max": 30,
+      "income_limit_annual": 250000,
+      "caste_categories_csv": "SC",
+      "occupation_categories_csv": "student",
+      "benefit_amount": "Rs. 1200 to Rs. 9000 per annum",
+      "application_url": "https://scholarships.gov.in",
+      "source_pdf_url": "https://scholarships.gov.in/docs/PostMatric_SC_guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_pm_vishwakarma_015",
+    "scheme_name": "PM Vishwakarma Scheme",
+    "page_content": "Scheme Name: PM Vishwakarma Scheme\nMinistry/Department: Ministry of Micro, Small and Medium Enterprises\nState: All India\nEligibility Criteria: Traditional artisans and craftspeople working with their hands and tools. 18 traditional trades covered including carpenter, blacksmith, potter, weaver, goldsmith, mason, tailor. Age 18 years and above. All caste categories: SC, ST, OBC, General. Occupation: worker, artisan, differently abled. Annual income no restriction. One member per family eligible.\nBenefit Amount: Collateral-free loan up to Rs. 3 lakh, Rs. 15000 toolkit grant\nBenefits: Recognition as Vishwakarma with certificate and ID card. Rs. 15000 toolkit incentive. Skill training at Rs. 500 per day stipend. Collateral-free loan: Rs. 1 lakh in first tranche, Rs. 2 lakh in second tranche at 5% interest. Digital transaction incentive of Rs. 1 per transaction up to 100 transactions per month.\nApplication Process: Register at pmvishwakarma.gov.in or at Common Service Centre. Documents: Aadhaar card, ration card, proof of trade, bank account details.\nApplication URL: https://pmvishwakarma.gov.in\nSource PDF: https://pmvishwakarma.gov.in/assets/docs/PM_Vishwakarma_Guidelines.pdf",
+    "metadata": {
+      "scheme_name": "PM Vishwakarma Scheme",
+      "ministry": "Ministry of Micro, Small and Medium Enterprises",
+      "state": "All India",
+      "age_min": 18,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "worker,differently abled",
+      "benefit_amount": "Collateral-free loan up to Rs. 3 lakh + Rs. 15000 toolkit grant",
+      "application_url": "https://pmvishwakarma.gov.in",
+      "source_pdf_url": "https://pmvishwakarma.gov.in/assets/docs/PM_Vishwakarma_Guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_pm_jan_dhan_016",
+    "scheme_name": "Pradhan Mantri Jan Dhan Yojana (PMJDY)",
+    "page_content": "Scheme Name: Pradhan Mantri Jan Dhan Yojana (PMJDY)\nMinistry/Department: Ministry of Finance\nState: All India\nEligibility Criteria: Any Indian citizen above 10 years of age who does not have a bank account. All caste categories including SC, ST, OBC, General, Minority. No minimum balance required. Applicable to all occupations: farmer, student, worker, woman entrepreneur, senior citizen, differently abled.\nBenefit Amount: Free bank account + Rs. 2 lakh accident insurance\nBenefits: Zero balance bank account with RuPay debit card. Accidental insurance cover of Rs. 2 lakh. Life insurance cover of Rs. 30000. Overdraft facility up to Rs. 10000. Access to pension and insurance products.\nApplication Process: Visit any bank branch or Business Correspondent with Aadhaar card or any valid government ID proof and one passport-size photograph.\nApplication URL: https://pmjdy.gov.in\nSource PDF: https://pmjdy.gov.in/files/E-circulars/2014/29082014.pdf",
+    "metadata": {
+      "scheme_name": "Pradhan Mantri Jan Dhan Yojana (PMJDY)",
+      "ministry": "Ministry of Finance",
+      "state": "All India",
+      "age_min": 10,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "farmer,student,worker,woman entrepreneur,senior citizen,differently abled",
+      "benefit_amount": "Free bank account + Rs. 2 lakh accident insurance",
+      "application_url": "https://pmjdy.gov.in",
+      "source_pdf_url": "https://pmjdy.gov.in/files/E-circulars/2014/29082014.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_up_widow_pension_017",
+    "scheme_name": "UP Widow Pension Scheme (Nirashrit Mahila Pension Yojana)",
+    "page_content": "Scheme Name: UP Widow Pension Scheme (Nirashrit Mahila Pension Yojana)\nMinistry/Department: Department of Social Welfare, Uttar Pradesh Government\nState: Uttar Pradesh\nEligibility Criteria: Widows who are permanent residents of Uttar Pradesh. Age 18 to 60 years. Annual family income should not exceed Rs. 200000. All caste categories: SC, ST, OBC, General, Minority. Gender: female. Occupation: other.\nBenefit Amount: Rs. 1000 per month\nBenefits: Monthly pension of Rs. 1000 directly credited to bank account. Financial security for widows and destitute women.\nApplication Process: Apply online at sspy-up.gov.in or through Jan Seva Kendras. Documents: death certificate of husband, income certificate, Aadhaar card, bank passbook, domicile certificate, age proof.\nApplication URL: https://sspy-up.gov.in\nSource PDF: https://sspy-up.gov.in/HindiPages/widow_pension.aspx",
+    "metadata": {
+      "scheme_name": "UP Widow Pension Scheme (Nirashrit Mahila Pension Yojana)",
+      "ministry": "Department of Social Welfare, Uttar Pradesh Government",
+      "state": "Uttar Pradesh",
+      "age_min": 18,
+      "age_max": 60,
+      "income_limit_annual": 200000,
+      "gender": "female",
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "other",
+      "benefit_amount": "Rs. 1000 per month",
+      "application_url": "https://sspy-up.gov.in",
+      "source_pdf_url": "https://sspy-up.gov.in/HindiPages/widow_pension.aspx",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_pm_shram_yogi_018",
+    "scheme_name": "PM Shram Yogi Maan-dhan (PM-SYM) Pension Scheme",
+    "page_content": "Scheme Name: PM Shram Yogi Maan-dhan (PM-SYM) Pension Scheme\nMinistry/Department: Ministry of Labour and Employment\nState: All India\nEligibility Criteria: Unorganised workers aged 18 to 40 years. Monthly income not exceeding Rs. 15000. Not covered under EPFO, ESIC or NPS. All caste categories: SC, ST, OBC, General, Minority. Occupation: worker, farmer, differently abled.\nBenefit Amount: Rs. 3000 per month pension after age 60\nBenefits: Assured monthly pension of Rs. 3000 after attaining 60 years of age. Voluntary and contributory pension. Government contributes equal amount as worker. In case of death, spouse receives 50% of pension.\nApplication Process: Enroll through Common Service Centres, LIC offices or online at maandhan.in. Documents: Aadhaar card, savings bank account or Jan Dhan account with IFSC code, mobile number.\nApplication URL: https://maandhan.in\nSource PDF: https://maandhan.in/content/uploads/2019/09/PM-SYM-Brochure.pdf",
+    "metadata": {
+      "scheme_name": "PM Shram Yogi Maan-dhan (PM-SYM) Pension Scheme",
+      "ministry": "Ministry of Labour and Employment",
+      "state": "All India",
+      "age_min": 18,
+      "age_max": 40,
+      "income_limit_annual": 180000,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "worker,farmer",
+      "benefit_amount": "Rs. 3000 per month pension after age 60",
+      "application_url": "https://maandhan.in",
+      "source_pdf_url": "https://maandhan.in/content/uploads/2019/09/PM-SYM-Brochure.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_pragati_scholarship_019",
+    "scheme_name": "Pragati Scholarship for Girl Students (Technical Education)",
+    "page_content": "Scheme Name: Pragati Scholarship for Girl Students (Technical Education)\nMinistry/Department: Ministry of Education, AICTE\nState: All India\nEligibility Criteria: Girl students admitted to first year of Diploma or Degree level technical program in AICTE approved institution. Age 18 to 30 years. Annual family income not exceeding Rs. 800000. Gender: female. All caste categories including SC, ST, OBC, General, Minority. Occupation: student. Only one girl child per family per year.\nBenefit Amount: Rs. 50000 per annum\nBenefits: Rs. 50000 per annum for 30000 girl students across India. Amount covers tuition fee and incidental charges. Awarded for each year of course duration.\nApplication Process: Apply through National Scholarship Portal at scholarships.gov.in during the application window. Documents: Aadhaar, income certificate, admission letter, bank account details.\nApplication URL: https://scholarships.gov.in\nSource PDF: https://scholarships.gov.in/docs/Pragati_Scholarship_guidelines.pdf",
+    "metadata": {
+      "scheme_name": "Pragati Scholarship for Girl Students (Technical Education)",
+      "ministry": "Ministry of Education, AICTE",
+      "state": "All India",
+      "age_min": 18,
+      "age_max": 30,
+      "income_limit_annual": 800000,
+      "gender": "female",
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "student",
+      "benefit_amount": "Rs. 50000 per annum",
+      "application_url": "https://scholarships.gov.in",
+      "source_pdf_url": "https://scholarships.gov.in/docs/Pragati_Scholarship_guidelines.pdf",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  },
+  {
+    "id": "scheme_up_divyang_pension_020",
+    "scheme_name": "UP Divyang Pension Yojana (Disability Pension Uttar Pradesh)",
+    "page_content": "Scheme Name: UP Divyang Pension Yojana (Disability Pension Uttar Pradesh)\nMinistry/Department: Department of Divyangjan Empowerment, Uttar Pradesh\nState: Uttar Pradesh\nEligibility Criteria: Persons with at least 40% disability who are permanent residents of Uttar Pradesh. Age 18 years and above. Annual family income should not exceed Rs. 200000. All caste categories: SC, ST, OBC, General, Minority. Occupation: differently abled. Must have disability certificate from competent authority.\nBenefit Amount: Rs. 1000 per month\nBenefits: Monthly pension of Rs. 1000 directly credited to bank account. Additional benefits under various convergence schemes.\nApplication Process: Apply online at sspy-up.gov.in or through Jan Seva Kendras. Documents: disability certificate, income certificate, Aadhaar card, bank passbook, domicile certificate.\nApplication URL: https://sspy-up.gov.in\nSource PDF: https://sspy-up.gov.in/HindiPages/divyang_pension.aspx",
+    "metadata": {
+      "scheme_name": "UP Divyang Pension Yojana (Disability Pension Uttar Pradesh)",
+      "ministry": "Department of Divyangjan Empowerment, Uttar Pradesh",
+      "state": "Uttar Pradesh",
+      "age_min": 18,
+      "income_limit_annual": 200000,
+      "caste_categories_csv": "SC,ST,OBC,General,Minority",
+      "occupation_categories_csv": "differently abled",
+      "benefit_amount": "Rs. 1000 per month",
+      "application_url": "https://sspy-up.gov.in",
+      "source_pdf_url": "https://sspy-up.gov.in/HindiPages/divyang_pension.aspx",
+      "chunking_strategy": "one_scheme_one_chunk"
+    }
+  }
+]

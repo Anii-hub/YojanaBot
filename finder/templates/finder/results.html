@@ -1,0 +1,332 @@
+{% extends "finder/base.html" %}
+{% load static %}
+
+{% block title %}Your Scheme Results — YojanaBot{% endblock %}
+{% block meta_description %}Your personalized government scheme eligibility results.{% endblock %}
+
+{% block content %}
+<div class="results-page py-5">
+  <div class="container">
+
+    <!-- ── HEADER ───────────────────────────────────────────────── -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'finder:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'finder:find' %}">Find Schemes</a></li>
+            <li class="breadcrumb-item active">Results</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <!-- ── RESULTS BANNER ───────────────────────────────────────── -->
+    <div class="results-banner rounded-4 p-4 p-md-5 mb-5 text-white position-relative overflow-hidden">
+      <div class="results-banner-bg"></div>
+      <div class="row align-items-center position-relative z-1">
+        <div class="col-md-8">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="result-icon-circle">
+              <i class="bi bi-check2-all fs-3 text-white"></i>
+            </div>
+            <div>
+              <h1 class="h2 fw-black mb-1">
+                {{ total_schemes }} Scheme{% if total_schemes != 1 %}s{% endif %} Found
+              </h1>
+              <p class="mb-0 text-white-75">
+                <strong class="text-warning">{{ high_matches }}</strong> high match{% if high_matches != 1 %}es{% endif %} for your profile
+              </p>
+            </div>
+          </div>
+          {% if not groq_available %}
+          <div class="alert alert-warning border-0 rounded-3 mb-0 py-2">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>AI analysis offline</strong> — Showing retrieval-based results.
+            Set <code>GROQ_API_KEY</code> for full AI-powered explanations.
+          </div>
+          {% endif %}
+        </div>
+        <div class="col-md-4 mt-4 mt-md-0">
+          <!-- Profile summary card -->
+          <div class="profile-recap-card p-3 rounded-3 bg-white bg-opacity-10 backdrop-blur">
+            <div class="small text-white-75 mb-2 fw-semibold">Your Profile</div>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-white bg-opacity-20 text-white"><i class="bi bi-geo-alt me-1"></i>{{ profile.state }}</span>
+              <span class="badge bg-white bg-opacity-20 text-white"><i class="bi bi-person me-1"></i>{{ profile.age }}yrs · {{ profile.gender|title }}</span>
+              <span class="badge bg-white bg-opacity-20 text-white"><i class="bi bi-currency-rupee"></i>{{ profile.annual_income_fmt }}</span>
+              <span class="badge bg-white bg-opacity-20 text-white">{{ profile.caste_category }}</span>
+              <span class="badge bg-white bg-opacity-20 text-white">{{ profile.occupation_type|title }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CSC HELP BANNER ─────────────────────────────────────── -->
+    <div class="csc-help-banner rounded-4 p-4 mb-4 d-flex align-items-start gap-3">
+      <div class="flex-shrink-0 csc-icon-circle">
+        <i class="bi bi-shop-window fs-4 text-white"></i>
+      </div>
+      <div class="flex-grow-1">
+        <div class="fw-bold text-dark mb-1">
+          {% if lang == 'hi' %}ऑनलाइन आवेदन करने में परेशानी है? घबराएं नहीं!{% else %}Don't know how to apply online? No problem!{% endif %}
+        </div>
+        <p class="small text-dark mb-2">
+          {% if lang == 'hi' %}
+            अपने नजदीकी <strong>CSC केंद्र (जन सेवा केंद्र)</strong> पर जाएं — वहाँ का ऑपरेटर आपके लिए <strong>मुफ्त में</strong> आवेदन करेगा। यह केंद्र हर गाँव और पंचायत में मौजूद है।
+          {% else %}
+            Visit your nearest <strong>CSC Center (Jan Seva Kendra)</strong> — the operator will apply on your behalf for <strong>free</strong>. These centers are present in every village and panchayat.
+          {% endif %}
+        </p>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <a href="https://locator.csccloud.in/" target="_blank" rel="noopener"
+             class="btn btn-success btn-sm fw-semibold px-3">
+            <i class="bi bi-geo-alt-fill me-1"></i>
+            {% if lang == 'hi' %}नजदीकी CSC केंद्र खोजें{% else %}Find CSC Center Near Me{% endif %}
+          </a>
+          <span class="small text-muted">
+            {% if lang == 'hi' %}या टोल-फ्री हेल्पलाइन पर कॉल करें:{% else %}or call the toll-free helpline:{% endif %}
+            <a href="tel:18003000468" class="fw-bold text-success text-decoration-none">
+              <i class="bi bi-telephone-fill me-1"></i>1800-3000-3468
+            </a>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- ── LEFT: SCHEME CARDS ──────────────────────────────────── -->
+      <div class="col-lg-8">
+
+        <!-- AI Analysis / Error Section -->
+        {% if rag_error and not groq_available %}
+        <div class="alert alert-warning border-0 rounded-4 mb-4 d-flex align-items-start gap-3">
+          <i class="bi bi-exclamation-triangle-fill fs-5 text-warning flex-shrink-0 mt-1"></i>
+          <div>
+            <strong>AI Analysis Offline</strong><br>
+            <span class="small">{{ rag_error }}</span>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if answer_text %}
+        <div class="card shadow-sm border-0 rounded-4 mb-4 ai-analysis-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="ai-badge-circle">
+                <i class="bi bi-robot text-white"></i>
+              </div>
+              <div>
+                <h2 class="h6 fw-bold mb-0">
+                  {% if lang == 'hi' %}AI विश्लेषण{% else %}AI-Powered Analysis{% endif %}
+                </h2>
+                <div class="x-small text-muted">{{ model_used }} · grounded on retrieved schemes</div>
+              </div>
+              {% if lang == 'hi' %}
+              <span class="badge ms-auto" style="background:var(--saffron)">हिंदी</span>
+              {% endif %}
+            </div>
+            <div class="ai-answer-text" id="aiAnswerText" data-raw="{{ answer_text|escapejs }}">
+              <!-- Rendered by marked.js below -->
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Scheme Cards -->
+        <h2 class="h5 fw-bold mb-3">
+          <i class="bi bi-list-stars me-2 text-saffron"></i>Matching Schemes
+        </h2>
+
+        {% if cards %}
+          {% for card in cards %}
+          <div class="scheme-card card shadow-sm border-0 rounded-4 mb-3 scheme-card-animate"
+               style="animation-delay: {{ forloop.counter0 }}00ms">
+            <div class="card-body p-4">
+
+              <!-- Card header row -->
+              <div class="d-flex align-items-start gap-3 mb-3">
+                <div class="rank-badge rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-start justify-content-between gap-2 flex-wrap">
+                    <h3 class="h6 fw-bold mb-1 text-dark">{{ card.scheme_name }}</h3>
+                    <span class="badge rounded-pill bg-{{ card.tier_class }} flex-shrink-0">
+                      <i class="bi {{ card.tier_icon }} me-1"></i>
+                      {% if card.tier_class == 'success' %}High Match
+                      {% elif card.tier_class == 'warning' %}Partial Match
+                      {% else %}Low Relevance{% endif %}
+                    </span>
+                  </div>
+                  {% if card.state and card.state != '—' %}
+                  <div class="small text-muted">
+                    <i class="bi bi-geo-alt me-1"></i>{{ card.state }}
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Confidence bar -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-muted">Match confidence</span>
+                  <span class="fw-semibold text-{{ card.tier_class }}">{{ card.confidence_pct }}%</span>
+                </div>
+                <div class="progress" style="height:5px">
+                  <div class="progress-bar bg-{{ card.tier_class }}"
+                       style="width:{{ card.confidence_pct }}%"></div>
+                </div>
+              </div>
+
+              <!-- Details grid -->
+              <div class="row g-2 mb-3">
+                <div class="col-12">
+                  <div class="detail-pill p-2 rounded-3 bg-light">
+                    <div class="x-small text-muted fw-semibold mb-1">
+                      <i class="bi bi-gift me-1"></i>BENEFIT
+                    </div>
+                    <div class="small fw-semibold text-success">{{ card.benefit }}</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="detail-pill p-2 rounded-3 bg-light">
+                    <div class="x-small text-muted fw-semibold mb-1">
+                      <i class="bi bi-check2-circle me-1"></i>WHY YOU QUALIFY
+                    </div>
+                    <div class="small text-dark">{{ card.why_eligible }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Warnings -->
+              {% if card.warnings %}
+              <div class="alert alert-warning border-0 rounded-3 py-2 mb-3 small">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                {{ card.warnings|join:", " }}
+              </div>
+              {% endif %}
+
+              <!-- Action buttons -->
+              <div class="d-flex gap-2 flex-wrap">
+                {% if card.application_url and card.application_url != '#' %}
+                <a href="{{ card.application_url }}" target="_blank" rel="noopener"
+                   class="btn btn-saffron btn-sm px-3">
+                  <i class="bi bi-box-arrow-up-right me-1"></i>Apply Now
+                </a>
+                {% endif %}
+                <a href="https://locator.csccloud.in/" target="_blank" rel="noopener"
+                   class="btn btn-outline-success btn-sm px-3"
+                   title="Find a CSC center near you to apply offline with free help">
+                  <i class="bi bi-shop-window me-1"></i>
+                  {% if lang == 'hi' %}CSC केंद्र खोजें{% else %}Find CSC Center{% endif %}
+                </a>
+              </div>
+
+            </div>
+          </div>
+          {% endfor %}
+
+        {% else %}
+          <!-- Empty state -->
+          <div class="text-center py-6">
+            <div class="empty-state-icon mb-4">
+              <i class="bi bi-search fs-1 text-muted"></i>
+            </div>
+            <h3 class="h5 fw-bold text-dark mb-2">No schemes found</h3>
+            <p class="text-muted mb-4">
+              The index may be empty. Make sure you've run the data pipeline first.
+            </p>
+            <a href="{% url 'finder:find' %}" class="btn btn-saffron">
+              <i class="bi bi-arrow-repeat me-1"></i>Try Again
+            </a>
+          </div>
+        {% endif %}
+
+      </div>
+
+      <!-- ── RIGHT SIDEBAR ───────────────────────────────────────── -->
+      <div class="col-lg-4">
+
+        <!-- Quick actions -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h3 class="h6 fw-bold mb-3"><i class="bi bi-lightning me-2 text-saffron"></i>Quick Actions</h3>
+            <div class="d-grid gap-2">
+              <a href="{% url 'finder:find' %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-arrow-repeat me-1"></i>Search Again
+              </a>
+              <a href="{% url 'finder:home' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-house me-1"></i>Back to Home
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Match breakdown donut -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h3 class="h6 fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-saffron"></i>Match Breakdown</h3>
+            {% for card in cards %}
+            <div class="mb-2">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-truncate me-2" style="max-width:180px">{{ card.scheme_name }}</span>
+                <span class="badge rounded-pill bg-{{ card.tier_class }}">{{ card.confidence_pct }}%</span>
+              </div>
+              <div class="progress" style="height:4px">
+                <div class="progress-bar bg-{{ card.tier_class }}" style="width:{{ card.confidence_pct }}%"></div>
+              </div>
+            </div>
+            {% empty %}
+            <p class="text-muted small mb-0">No results to display.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Tip card -->
+        <div class="card border-0 rounded-4 bg-saffron-subtle">
+          <div class="card-body p-4">
+            <h3 class="h6 fw-bold text-saffron mb-2">
+              <i class="bi bi-lightbulb-fill me-1"></i>💡 Pro Tip
+            </h3>
+            <p class="small text-dark mb-0">
+              Always verify your eligibility on the official government portal
+              before applying. Criteria can change without notice.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Render the LLM answer markdown using marked.js
+document.addEventListener('DOMContentLoaded', function() {
+  const el = document.getElementById('aiAnswerText');
+  if (el && typeof marked !== 'undefined') {
+    const raw = el.getAttribute('data-raw') || '';
+    if (raw.trim()) {
+      marked.setOptions({ breaks: true, gfm: true });
+      el.innerHTML = marked.parse(raw);
+    }
+  }
+
+  // Animate all progress bars smoothly on page load
+  document.querySelectorAll('.progress-bar').forEach(function(bar) {
+    const target = bar.style.width;
+    bar.style.width = '0%';
+    bar.style.transition = 'none';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        bar.style.transition = 'width 1s ease 0.2s';
+        bar.style.width = target;
+      });
+    });
+  });
+});
+</script>
+{% endblock %}

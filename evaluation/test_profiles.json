@@ -1,0 +1,343 @@
+[
+  {
+    "profile_id": "P01",
+    "description": "Young SC female student from Uttar Pradesh",
+    "profile": {
+      "state": "Uttar Pradesh",
+      "age": 19,
+      "gender": "female",
+      "annual_income": 80000,
+      "caste_category": "SC",
+      "occupation_type": "student"
+    },
+    "ground_truth_schemes": [
+      "UP Scholarship Scheme",
+      "Post Matric Scholarship for SC",
+      "Pre Matric Scholarship for SC",
+      "National Scholarship Portal SC Scholarship"
+    ]
+  },
+  {
+    "profile_id": "P02",
+    "description": "Marginal farmer from Uttar Pradesh, OBC, low income",
+    "profile": {
+      "state": "Uttar Pradesh",
+      "age": 42,
+      "gender": "male",
+      "annual_income": 60000,
+      "caste_category": "OBC",
+      "occupation_type": "farmer"
+    },
+    "ground_truth_schemes": [
+      "PM Kisan Samman Nidhi",
+      "PM Fasal Bima Yojana",
+      "Kisan Credit Card",
+      "UP Kisan Rin Mochan Yojana"
+    ]
+  },
+  {
+    "profile_id": "P03",
+    "description": "ST senior citizen woman from Haryana",
+    "profile": {
+      "state": "Haryana",
+      "age": 64,
+      "gender": "female",
+      "annual_income": 50000,
+      "caste_category": "ST",
+      "occupation_type": "senior citizen"
+    },
+    "ground_truth_schemes": [
+      "Indira Gandhi National Old Age Pension Scheme",
+      "Haryana Old Age Samman Allowance",
+      "PM Jan Dhan Yojana"
+    ]
+  },
+  {
+    "profile_id": "P04",
+    "description": "Differently abled male worker from Bihar",
+    "profile": {
+      "state": "Bihar",
+      "age": 35,
+      "gender": "male",
+      "annual_income": 90000,
+      "caste_category": "General",
+      "occupation_type": "differently abled"
+    },
+    "ground_truth_schemes": [
+      "PM Disha (Divyang)",
+      "Assistance to Disabled Persons",
+      "NHFDC Loan Scheme"
+    ]
+  },
+  {
+    "profile_id": "P05",
+    "description": "Woman entrepreneur from Maharashtra, OBC",
+    "profile": {
+      "state": "Maharashtra",
+      "age": 30,
+      "gender": "female",
+      "annual_income": 250000,
+      "caste_category": "OBC",
+      "occupation_type": "woman entrepreneur"
+    },
+    "ground_truth_schemes": [
+      "Pradhan Mantri MUDRA Yojana",
+      "Stand-Up India",
+      "Mahila Udyam Nidhi Scheme"
+    ]
+  },
+  {
+    "profile_id": "P06",
+    "description": "SC male worker from Rajasthan, low income",
+    "profile": {
+      "state": "Rajasthan",
+      "age": 28,
+      "gender": "male",
+      "annual_income": 70000,
+      "caste_category": "SC",
+      "occupation_type": "worker"
+    },
+    "ground_truth_schemes": [
+      "PM Shram Yogi Maandhan",
+      "Building and Other Construction Workers Welfare Scheme",
+      "e-Shram Portal Registration"
+    ]
+  },
+  {
+    "profile_id": "P07",
+    "description": "General category female student from Gujarat",
+    "profile": {
+      "state": "Gujarat",
+      "age": 17,
+      "gender": "female",
+      "annual_income": 150000,
+      "caste_category": "General",
+      "occupation_type": "student"
+    },
+    "ground_truth_schemes": [
+      "PM Vidya Lakshmi Education Loan",
+      "CBSE Merit Scholarship",
+      "Pragati Scholarship for Girls"
+    ]
+  },
+  {
+    "profile_id": "P08",
+    "description": "Minority female widow from UP, low income",
+    "profile": {
+      "state": "Uttar Pradesh",
+      "age": 38,
+      "gender": "female",
+      "annual_income": 55000,
+      "caste_category": "Minority",
+      "occupation_type": "other"
+    },
+    "ground_truth_schemes": [
+      "PM Awas Yojana (Gramin)",
+      "Widow Pension Scheme UP",
+      "Nari Shakti Puraskar"
+    ]
+  },
+  {
+    "profile_id": "P09",
+    "description": "Young ST male student from Jharkhand",
+    "profile": {
+      "state": "Jharkhand",
+      "age": 16,
+      "gender": "male",
+      "annual_income": 40000,
+      "caste_category": "ST",
+      "occupation_type": "student"
+    },
+    "ground_truth_schemes": [
+      "Pre Matric Scholarship for ST",
+      "Post Matric Scholarship for ST",
+      "Eklavya Model Residential School"
+    ]
+  },
+  {
+    "profile_id": "P10",
+    "description": "SC female senior citizen from Karnataka",
+    "profile": {
+      "state": "Karnataka",
+      "age": 62,
+      "gender": "female",
+      "annual_income": 45000,
+      "caste_category": "SC",
+      "occupation_type": "senior citizen"
+    },
+    "ground_truth_schemes": [
+      "Indira Gandhi National Old Age Pension Scheme",
+      "Karnataka Sandhya Suraksha Yojana",
+      "SC/ST Welfare Pension Karnataka"
+    ]
+  },
+  {
+    "profile_id": "P11",
+    "description": "OBC male farmer from Punjab, medium income",
+    "profile": {
+      "state": "Punjab",
+      "age": 50,
+      "gender": "male",
+      "annual_income": 180000,
+      "caste_category": "OBC",
+      "occupation_type": "farmer"
+    },
+    "ground_truth_schemes": [
+      "PM Kisan Samman Nidhi",
+      "Kisan Credit Card",
+      "PM Fasal Bima Yojana"
+    ]
+  },
+  {
+    "profile_id": "P12",
+    "description": "General young male student from Delhi",
+    "profile": {
+      "state": "Delhi",
+      "age": 21,
+      "gender": "male",
+      "annual_income": 300000,
+      "caste_category": "General",
+      "occupation_type": "student"
+    },
+    "ground_truth_schemes": [
+      "PM Vidya Lakshmi Education Loan",
+      "National Overseas Scholarship"
+    ]
+  },
+  {
+    "profile_id": "P13",
+    "description": "SC differently abled woman from West Bengal",
+    "profile": {
+      "state": "West Bengal",
+      "age": 29,
+      "gender": "female",
+      "annual_income": 65000,
+      "caste_category": "SC",
+      "occupation_type": "differently abled"
+    },
+    "ground_truth_schemes": [
+      "Assistance to Disabled Persons",
+      "NHFDC Loan Scheme",
+      "PM Vishwakarma Scheme"
+    ]
+  },
+  {
+    "profile_id": "P14",
+    "description": "OBC woman entrepreneur from Tamil Nadu",
+    "profile": {
+      "state": "Tamil Nadu",
+      "age": 33,
+      "gender": "female",
+      "annual_income": 220000,
+      "caste_category": "OBC",
+      "occupation_type": "woman entrepreneur"
+    },
+    "ground_truth_schemes": [
+      "Stand-Up India",
+      "Pradhan Mantri MUDRA Yojana",
+      "Tamil Nadu Women Entrepreneur Scheme"
+    ]
+  },
+  {
+    "profile_id": "P15",
+    "description": "ST male worker from Madhya Pradesh, very low income",
+    "profile": {
+      "state": "Madhya Pradesh",
+      "age": 31,
+      "gender": "male",
+      "annual_income": 48000,
+      "caste_category": "ST",
+      "occupation_type": "worker"
+    },
+    "ground_truth_schemes": [
+      "e-Shram Portal Registration",
+      "PM Shram Yogi Maandhan",
+      "Ayushman Bharat PM-JAY"
+    ]
+  },
+  {
+    "profile_id": "P16",
+    "description": "General female senior citizen from Uttar Pradesh",
+    "profile": {
+      "state": "Uttar Pradesh",
+      "age": 68,
+      "gender": "female",
+      "annual_income": 90000,
+      "caste_category": "General",
+      "occupation_type": "senior citizen"
+    },
+    "ground_truth_schemes": [
+      "Indira Gandhi National Old Age Pension Scheme",
+      "PM Awas Yojana (Gramin)",
+      "UP Vridha Pension Yojana"
+    ]
+  },
+  {
+    "profile_id": "P17",
+    "description": "OBC young male farmer from Haryana",
+    "profile": {
+      "state": "Haryana",
+      "age": 24,
+      "gender": "male",
+      "annual_income": 100000,
+      "caste_category": "OBC",
+      "occupation_type": "farmer"
+    },
+    "ground_truth_schemes": [
+      "PM Kisan Samman Nidhi",
+      "Haryana Kisan Pension Scheme",
+      "Kisan Credit Card"
+    ]
+  },
+  {
+    "profile_id": "P18",
+    "description": "SC male student from Bihar, very low income",
+    "profile": {
+      "state": "Bihar",
+      "age": 18,
+      "gender": "male",
+      "annual_income": 30000,
+      "caste_category": "SC",
+      "occupation_type": "student"
+    },
+    "ground_truth_schemes": [
+      "Post Matric Scholarship for SC",
+      "Dr. Ambedkar Post Matric Scholarship",
+      "Bihar SC/ST Scholarship"
+    ]
+  },
+  {
+    "profile_id": "P19",
+    "description": "Minority male worker from UP, BPL",
+    "profile": {
+      "state": "Uttar Pradesh",
+      "age": 40,
+      "gender": "male",
+      "annual_income": 55000,
+      "caste_category": "Minority",
+      "occupation_type": "worker"
+    },
+    "ground_truth_schemes": [
+      "PM Jan Dhan Yojana",
+      "Ayushman Bharat PM-JAY",
+      "e-Shram Portal Registration"
+    ]
+  },
+  {
+    "profile_id": "P20",
+    "description": "OBC female differently-abled student from Rajasthan",
+    "profile": {
+      "state": "Rajasthan",
+      "age": 20,
+      "gender": "female",
+      "annual_income": 85000,
+      "caste_category": "OBC",
+      "occupation_type": "differently abled"
+    },
+    "ground_truth_schemes": [
+      "Assistance to Disabled Persons",
+      "NHFDC Loan Scheme",
+      "Post Matric Scholarship for OBC"
+    ]
+  }
+]

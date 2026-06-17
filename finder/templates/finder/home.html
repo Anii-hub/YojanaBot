@@ -1,0 +1,196 @@
+{% extends "finder/base.html" %}
+{% load static %}
+
+{% block title %}YojanaBot — Find Your Government Schemes{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════ HERO SECTION ═══════════════════════════════════ -->
+<section class="hero-section position-relative overflow-hidden">
+  <!-- Animated background particles -->
+  <div class="hero-bg-gradient"></div>
+  <div class="hero-ashoka" aria-hidden="true">&#9784;</div>
+
+  <div class="container position-relative z-1">
+    <div class="row align-items-center min-vh-100 py-5">
+      <div class="col-lg-7 text-white">
+
+        <!-- Flag badge -->
+        <div class="d-inline-flex align-items-center gap-2 hero-badge mb-4" data-aos="fade-down">
+          <span style="font-size:1.3rem">🇮🇳</span>
+          <span class="small fw-semibold">Made for Bharat · भारत के लिए</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="hero-title display-4 fw-black mb-4" data-aos="fade-up">
+          Find Every Government<br>
+          <span class="text-gradient-saffron">Scheme You Deserve</span>
+        </h1>
+
+        <p class="hero-subtitle fs-5 text-white-75 mb-5 pe-lg-5" data-aos="fade-up" data-aos-delay="100">
+          Answer 6 simple questions. Our AI searches <strong>thousands of central &amp; state schemes</strong>
+          — PM Kisan, scholarships, pensions, loans — and tells you exactly which ones you qualify for,
+          with direct application links.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="d-flex flex-wrap gap-3 mb-5" data-aos="fade-up" data-aos-delay="200">
+          <a href="{% url 'finder:find' %}" class="btn btn-saffron btn-lg px-5 py-3 fw-bold shadow-lg">
+            <i class="bi bi-stars me-2"></i>Check My Eligibility
+          </a>
+          <a href="{% url 'finder:about' %}" class="btn btn-outline-light btn-lg px-4 py-3">
+            <i class="bi bi-info-circle me-2"></i>How It Works
+          </a>
+        </div>
+
+        <!-- Stats row -->
+        <div class="row g-3 mt-2" data-aos="fade-up" data-aos-delay="300">
+          {% for icon, num, label in stats %}
+          <div class="col-4">
+            <div class="stat-card p-3 rounded-3 text-center">
+              <div class="stat-num fw-black fs-3">{{ num }}</div>
+              <div class="stat-label small text-white-75">{{ label }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+
+      <!-- Right card preview -->
+      <div class="col-lg-5 d-none d-lg-block" data-aos="fade-left" data-aos-delay="200">
+        <div class="hero-card-stack">
+          <div class="scheme-preview-card card-1 shadow-lg p-4 rounded-4">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="scheme-icon-circle bg-success-subtle">
+                <i class="bi bi-check-circle-fill text-success fs-4"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-dark">PM Kisan Samman Nidhi</div>
+                <div class="small text-muted">Central Scheme · Farmer</div>
+              </div>
+              <span class="badge bg-success ms-auto">✅ High Match</span>
+            </div>
+            <div class="small text-muted mb-2"><i class="bi bi-currency-rupee"></i> <strong>₹6,000/year</strong> — 3 equal installments</div>
+            <div class="small text-success"><i class="bi bi-check2 me-1"></i>State · Income · Occupation matched</div>
+          </div>
+
+          <div class="scheme-preview-card card-2 shadow p-4 rounded-4">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="scheme-icon-circle bg-warning-subtle">
+                <i class="bi bi-book-fill text-warning fs-4"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-dark">UP Scholarship Scheme</div>
+                <div class="small text-muted">State Scheme · Student</div>
+              </div>
+              <span class="badge bg-success ms-auto">✅ High Match</span>
+            </div>
+            <div class="small text-muted mb-2"><i class="bi bi-currency-rupee"></i> <strong>₹3,000/annum</strong> — SC/ST/OBC students</div>
+            <div class="small text-success"><i class="bi bi-check2 me-1"></i>Caste · State · Age matched</div>
+          </div>
+
+          <div class="scheme-preview-card card-3 shadow-sm p-4 rounded-4">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="scheme-icon-circle bg-info-subtle">
+                <i class="bi bi-house-fill text-info fs-4"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-dark">PM Awas Yojana</div>
+                <div class="small text-muted">Central Scheme · Housing</div>
+              </div>
+              <span class="badge bg-warning text-dark ms-auto">⚠️ Partial</span>
+            </div>
+            <div class="small text-muted mb-2">Housing for BPL families</div>
+            <div class="small text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Income limit — verify details</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ HOW IT WORKS ══════════════════════════════════ -->
+<section class="py-6 bg-white" id="how-it-works">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-eyebrow">Simple · Fast · Free</span>
+      <h2 class="section-title">How YojanaBot Works</h2>
+      <p class="text-muted fs-5 mx-auto" style="max-width:580px">
+        Three steps. Two minutes. Hundreds of schemes searched automatically.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      {% for step_num, icon, title, desc in how_steps %}
+      <div class="col-md-4">
+        <div class="how-card h-100 p-4 rounded-4 position-relative">
+          <div class="step-badge">{{ step_num }}</div>
+          <div class="how-icon mb-3"><i class="bi {{ icon }} fs-1 text-saffron"></i></div>
+          <h5 class="fw-bold mb-2">{{ title }}</h5>
+          <p class="text-muted small mb-0">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ SCHEME CATEGORIES ═════════════════════════════ -->
+<section class="py-6 bg-light-india">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-eyebrow">Categories We Cover</span>
+      <h2 class="section-title">Schemes for Every Indian</h2>
+    </div>
+    <div class="row g-3 justify-content-center">
+      {% for icon, label, color in categories %}
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="category-pill text-center p-3 rounded-4 h-100" style="border-top: 3px solid {{ color }}">
+          <div class="fs-2 mb-2">{{ icon }}</div>
+          <div class="small fw-semibold text-dark">{{ label }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ FINAL CTA ═════════════════════════════════════ -->
+<section class="py-6 cta-section text-center text-white">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <h2 class="display-5 fw-black mb-3">Ready to Find Your Schemes?</h2>
+        <p class="fs-5 text-white-75 mb-5">It takes less than 2 minutes. No registration required.</p>
+        <a href="{% url 'finder:find' %}" class="btn btn-saffron btn-lg px-6 py-3 fw-bold shadow-lg">
+          <i class="bi bi-stars me-2"></i>Get Started — It's Free
+        </a>
+        <div class="mt-4 small text-white-75">
+          <i class="bi bi-shield-check me-1"></i>Your data stays private. Nothing is stored on our servers.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const stats = [
+  { num: "1500+", label: "Schemes Covered" },
+  { num: "36", label: "States & UTs" },
+  { num: "2 min", label: "Average Time" },
+];
+// Animated counter
+document.querySelectorAll('.stat-num').forEach((el, i) => {
+  el.style.opacity = 0;
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.6s';
+    el.style.opacity = 1;
+  }, 400 + i * 150);
+});
+</script>
+{% endblock %}
