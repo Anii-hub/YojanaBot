@@ -116,19 +116,32 @@ def find_schemes(profile: dict[str, Any], lang: str = "en") -> dict[str, Any]:
         vector_store=store,
         top_k=settings.RAG_TOP_K,
         model_name=settings.GROQ_MODEL,
+        lang=lang,   # LLM writes natively in Hindi when lang='hi'
     )
 
-    # Translate answer if Hindi requested
+    # If Groq was unavailable the fallback answer is in English —
+    # translate it to Hindi so the user still gets a Hindi-language response.
     answer_text = response.answer_text
-    if lang == "hi" and answer_text:
+    if lang == "hi" and answer_text and not response.groq_available:
         answer_text = localise_response(answer_text, lang="hi")
 
-    cards = build_scheme_cards(response)
+    cards = build_scheme_cards(response, lang=lang)
+
+    def _hi(text: str) -> str:
+        """Translate a short string to Hindi. Returns original on any failure."""
+        if not text or text in ("—", "#", "See scheme document", "योजना दस्तावेज़ देखें"):
+            return text
+        try:
+            return localise_response(text, lang="hi") or text
+        except Exception:
+            return text
+
     cards_dicts = [
         {
             "rank": c.rank,
-            "scheme_name": c.scheme_name,
-            "benefit": c.benefit,
+            # Translate scheme name and benefit text when Hindi mode is active
+            "scheme_name": _hi(c.scheme_name) if lang == "hi" else c.scheme_name,
+            "benefit":     _hi(c.benefit)      if lang == "hi" else c.benefit,
             "why_eligible": c.why_eligible,
             "application_url": c.application_url,
             "confidence_tier": c.confidence_tier,

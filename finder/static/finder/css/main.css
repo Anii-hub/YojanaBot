@@ -49,7 +49,6 @@ main { flex: 1; }
 /* ── Utility helpers ────────────────────────────────────────── */
 .py-6  { padding-top: 5rem !important; padding-bottom: 5rem !important; }
 .px-6  { padding-left: 4rem !important; padding-right: 4rem !important; }
-.mb-6  { margin-bottom: 5rem !important; }
 .x-small { font-size: .70rem; }
 .text-white-75 { color: rgba(255,255,255,.75) !important; }
 .z-1 { z-index: 1; }
@@ -104,7 +103,7 @@ main { flex: 1; }
 }
 
 /* ── Saffron CTA button ─────────────────────────────────────── */
-.btn-saffron, .btn-gradient-saffron {
+.btn-saffron {
   background: linear-gradient(135deg, var(--saffron) 0%, #FF6B00 100%);
   color: #fff !important;
   border: none;
@@ -114,7 +113,7 @@ main { flex: 1; }
   box-shadow: 0 4px 15px rgba(255,153,51,.35);
 }
 
-.btn-saffron:hover, .btn-gradient-saffron:hover {
+.btn-saffron:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(255,153,51,.45);
   color: #fff !important;
@@ -451,14 +450,36 @@ main { flex: 1; }
   display: flex; align-items: center; justify-content: center;
 }
 
-.ai-answer-text {
-  font-size: .92rem;
-  line-height: 1.75;
+/* AI answer text — Noto Sans Devanagari ensures Hindi renders correctly */
+#aiAnswerText {
+  font-family: 'Noto Sans Devanagari', 'Inter', system-ui, sans-serif;
+  font-size: .97rem;
+  line-height: 1.85;
   color: var(--text-primary);
 }
-
-.ai-answer-text p { margin-bottom: .75rem; }
-.ai-answer-text strong { color: var(--saffron-dark); }
+#aiAnswerText p  { margin-bottom: .7rem; }
+#aiAnswerText strong, #aiAnswerText b { color: var(--navy); font-weight: 700; }
+#aiAnswerText a  { color: var(--saffron-dark); font-weight: 600; text-underline-offset: 3px; word-break: break-all; }
+#aiAnswerText a:hover { color: #c4701a; }
+#aiAnswerText em, #aiAnswerText i:not(.bi) { color: var(--text-muted); }
+#aiAnswerText hr { border-color: var(--border); margin: 1rem 0; }
+#aiAnswerText h1, #aiAnswerText h2, #aiAnswerText h3 {
+  font-size: 1rem; font-weight: 700;
+  margin-top: 1.2rem; margin-bottom: .4rem;
+  color: var(--navy);
+}
+/* Numbered scheme items */
+#aiAnswerText ol { padding-left: 1.3rem; }
+#aiAnswerText ol > li {
+  margin-bottom: 1.4rem;
+  padding: 1rem 1rem 1rem .5rem;
+  border-radius: .6rem;
+  background: #f8f9ff;
+  border-left: 3px solid var(--saffron-dark);
+}
+/* Bullet sub-points */
+#aiAnswerText ul { padding-left: 1.1rem; margin-top: .35rem; margin-bottom: 0; }
+#aiAnswerText ul > li { margin-bottom: .35rem; color: #3a3d55; }
 
 /* Profile recap badges in results banner */
 .profile-recap-card { border: 1px solid rgba(255,255,255,.15); }
@@ -499,6 +520,14 @@ main { flex: 1; }
   box-shadow: 0 4px 12px rgba(255,153,51,.35);
 }
 
+/* FAQ Accordion overrides (about page) */
+.accordion-button:not(.collapsed) {
+  background-color: #fff7ed;
+  color: #c2410c;
+  box-shadow: none;
+}
+.accordion-button:focus { box-shadow: none; }
+
 /* ════════════════════════════════════════════════════════════
    FOOTER
 ════════════════════════════════════════════════════════════ */
@@ -520,18 +549,14 @@ main { flex: 1; }
 .badge { font-weight: 600; letter-spacing: .02em; }
 .badge.bg-success { background-color: #15803D !important; }
 .badge.bg-warning { background-color: #D97706 !important; color: #fff !important; }
-.bg-saffron { background-color: var(--saffron) !important; }
+/* .bg-saffron already defined in Colours section above */
 
 .progress { border-radius: 2rem; background: #E5E7EB; }
 .progress-bar { border-radius: 2rem; }
 
-.breadcrumb-item a {
-  color: var(--saffron);
-  text-decoration: none;
-}
+.breadcrumb-item a { color: var(--saffron); text-decoration: none; }
 .breadcrumb-item a:hover { text-decoration: underline; }
 
-/* Alert warning override */
 .alert-warning {
   background: #FFFBEB;
   border: 1px solid #FDE68A;
@@ -546,18 +571,14 @@ main { flex: 1; }
   .hero-section { min-height: auto; padding: 5rem 0; }
   .hero-card-stack { display: none; }
   .py-6 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
-  .pipeline-step { min-width: 100px; }
 }
 
 @media (max-width: 576px) {
-  .lang-option { min-width: 0; }
   .lang-label { padding: .6rem; }
 }
 
-/* ── Smooth page transitions ──────────────────────────────── */
-.scheme-card, .how-card, .category-pill, .tech-card {
-  will-change: transform;
-}
+/* Hint for browser paint optimisation on animated cards */
+.scheme-card, .how-card, .category-pill { will-change: transform; }
 
 /* ── Custom scrollbar ─────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }

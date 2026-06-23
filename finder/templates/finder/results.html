@@ -13,9 +13,9 @@
       <div class="col-12">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'finder:home' %}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'finder:find' %}">Find Schemes</a></li>
-            <li class="breadcrumb-item active">Results</li>
+            <li class="breadcrumb-item"><a href="{% url 'finder:home' %}">{% if lang == 'hi' %}होम{% else %}Home{% endif %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'finder:find' %}">{% if lang == 'hi' %}योजना खोजें{% else %}Find Schemes{% endif %}</a></li>
+            <li class="breadcrumb-item active">{% if lang == 'hi' %}परिणाम{% else %}Results{% endif %}</li>
           </ol>
         </nav>
       </div>
@@ -32,31 +32,45 @@
             </div>
             <div>
               <h1 class="h2 fw-black mb-1">
-                {{ total_schemes }} Scheme{% if total_schemes != 1 %}s{% endif %} Found
+                {% if lang == 'hi' %}
+                  {{ total_schemes }} योजना{% if total_schemes != 1 %}एँ{% endif %} मिलीं
+                {% else %}
+                  {{ total_schemes }} Scheme{% if total_schemes != 1 %}s{% endif %} Found
+                {% endif %}
               </h1>
               <p class="mb-0 text-white-75">
-                <strong class="text-warning">{{ high_matches }}</strong> high match{% if high_matches != 1 %}es{% endif %} for your profile
+                {% if lang == 'hi' %}
+                  <strong class="text-warning">{{ high_matches }}</strong> उच्च मिलान आपकी प्रोफ़ाइल से
+                {% else %}
+                  <strong class="text-warning">{{ high_matches }}</strong> high match{% if high_matches != 1 %}es{% endif %} for your profile
+                {% endif %}
               </p>
             </div>
           </div>
           {% if not groq_available %}
           <div class="alert alert-warning border-0 rounded-3 mb-0 py-2">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <strong>AI analysis offline</strong> — Showing retrieval-based results.
-            Set <code>GROQ_API_KEY</code> for full AI-powered explanations.
+            {% if lang == 'hi' %}
+              <strong>AI विश्लेषण ऑफलाइन है</strong> — केवल खोज परिणाम दिखाए जा रहे हैं। पूरे AI उत्तर के लिए <code>GROQ_API_KEY</code> सेट करें।
+            {% else %}
+              <strong>AI analysis offline</strong> — Showing retrieval-based results.
+              Set <code>GROQ_API_KEY</code> for full AI-powered explanations.
+            {% endif %}
           </div>
           {% endif %}
         </div>
         <div class="col-md-4 mt-4 mt-md-0">
           <!-- Profile summary card -->
           <div class="profile-recap-card p-3 rounded-3 bg-white bg-opacity-10 backdrop-blur">
-            <div class="small text-white-75 mb-2 fw-semibold">Your Profile</div>
+            <div class="small text-white-75 mb-2 fw-semibold">
+              {% if lang == 'hi' %}आपकी प्रोफ़ाइल{% else %}Your Profile{% endif %}
+            </div>
             <div class="d-flex flex-wrap gap-2">
-              <span class="badge bg-white bg-opacity-20 text-white"><i class="bi bi-geo-alt me-1"></i>{{ profile.state }}</span>
-              <span class="badge bg-white bg-opacity-20 text-white"><i class="bi bi-person me-1"></i>{{ profile.age }}yrs · {{ profile.gender|title }}</span>
-              <span class="badge bg-white bg-opacity-20 text-white"><i class="bi bi-currency-rupee"></i>{{ profile.annual_income_fmt }}</span>
-              <span class="badge bg-white bg-opacity-20 text-white">{{ profile.caste_category }}</span>
-              <span class="badge bg-white bg-opacity-20 text-white">{{ profile.occupation_type|title }}</span>
+              <span class="badge bg-white text-dark fw-semibold"><i class="bi bi-geo-alt me-1"></i>{{ profile.state }}</span>
+              <span class="badge bg-white text-dark fw-semibold"><i class="bi bi-person me-1"></i>{{ profile.age }}{% if lang == 'hi' %}वर्ष{% else %}yrs{% endif %} · {{ profile.gender|title }}</span>
+              <span class="badge bg-white text-dark fw-semibold"><i class="bi bi-currency-rupee"></i>{{ profile.annual_income_fmt }}</span>
+              <span class="badge bg-white text-dark fw-semibold">{{ profile.caste_category }}</span>
+              <span class="badge bg-white text-dark fw-semibold">{{ profile.occupation_type|title }}</span>
             </div>
           </div>
         </div>
@@ -105,7 +119,7 @@
         <div class="alert alert-warning border-0 rounded-4 mb-4 d-flex align-items-start gap-3">
           <i class="bi bi-exclamation-triangle-fill fs-5 text-warning flex-shrink-0 mt-1"></i>
           <div>
-            <strong>AI Analysis Offline</strong><br>
+            <strong>{% if lang == 'hi' %}AI विश्लेषण ऑफलाइन{% else %}AI Analysis Offline{% endif %}</strong><br>
             <span class="small">{{ rag_error }}</span>
           </div>
         </div>
@@ -114,30 +128,59 @@
         {% if answer_text %}
         <div class="card shadow-sm border-0 rounded-4 mb-4 ai-analysis-card">
           <div class="card-body p-4">
+
+            <!-- Card header -->
             <div class="d-flex align-items-center gap-2 mb-3">
               <div class="ai-badge-circle">
                 <i class="bi bi-robot text-white"></i>
               </div>
-              <div>
+              <div class="flex-grow-1">
                 <h2 class="h6 fw-bold mb-0">
-                  {% if lang == 'hi' %}AI विश्लेषण{% else %}AI-Powered Analysis{% endif %}
+                  {% if lang == 'hi' %}🤖 AI विश्लेषण — आपके लिए पात्र योजनाएँ{% else %}🤖 AI-Powered Analysis — Your Eligible Schemes{% endif %}
                 </h2>
-                <div class="x-small text-muted">{{ model_used }} · grounded on retrieved schemes</div>
+                <div class="x-small text-muted mt-1">
+                  {% if lang == 'hi' %}
+                    {{ model_used }} · प्राप्त योजना दस्तावेज़ों पर आधारित
+                  {% else %}
+                    {{ model_used }} · grounded on retrieved scheme documents
+                  {% endif %}
+                </div>
               </div>
               {% if lang == 'hi' %}
-              <span class="badge ms-auto" style="background:var(--saffron)">हिंदी</span>
+              <span class="badge flex-shrink-0" style="background:var(--saffron)">हिंदी</span>
               {% endif %}
             </div>
-            <div class="ai-answer-text" id="aiAnswerText" data-raw="{{ answer_text|escapejs }}">
-              <!-- Rendered by marked.js below -->
+
+            <!-- Divider -->
+            <hr class="my-3" />
+
+            <!-- LLM answer — text injected by JS below -->
+            <!-- The raw text is stored in a JSON script tag (not data-raw) to
+                 avoid Django's escapejs converting \n → \u000A which then shows
+                 as literal text instead of rendering as a newline. -->
+            <div class="ai-answer-text" id="aiAnswerText"></div>
+            <script id="aiAnswerRaw" type="application/json">{{ answer_text|escapejs }}</script>
+
+            <!-- Footer note -->
+            <div class="mt-3 pt-3 border-top">
+              <p class="x-small text-muted mb-0">
+                <i class="bi bi-shield-check me-1 text-success"></i>
+                {% if lang == 'hi' %}
+                  यह उत्तर केवल ऊपर प्राप्त योजना दस्तावेज़ों पर आधारित है। LLM ने कोई जानकारी स्वयं नहीं बनाई है।
+                {% else %}
+                  This answer is grounded strictly on the retrieved scheme documents — the AI cannot invent eligibility criteria.
+                {% endif %}
+              </p>
             </div>
+
           </div>
         </div>
         {% endif %}
 
         <!-- Scheme Cards -->
         <h2 class="h5 fw-bold mb-3">
-          <i class="bi bi-list-stars me-2 text-saffron"></i>Matching Schemes
+          <i class="bi bi-list-stars me-2 text-saffron"></i>
+          {% if lang == 'hi' %}मिलान करने वाली योजनाएँ{% else %}Matching Schemes{% endif %}
         </h2>
 
         {% if cards %}
@@ -154,23 +197,29 @@
                     <h3 class="h6 fw-bold mb-1 text-dark">{{ card.scheme_name }}</h3>
                     <span class="badge rounded-pill bg-{{ card.tier_class }} flex-shrink-0">
                       <i class="bi {{ card.tier_icon }} me-1"></i>
-                      {% if card.tier_class == 'success' %}High Match
-                      {% elif card.tier_class == 'warning' %}Partial Match
-                      {% else %}Low Relevance{% endif %}
+                      {% if lang == 'hi' %}
+                        {% if card.tier_class == 'success' %}उच्च मिलान
+                        {% elif card.tier_class == 'warning' %}आंशिक मिलान
+                        {% else %}कम प्रासंगिक{% endif %}
+                      {% else %}
+                        {% if card.tier_class == 'success' %}High Match
+                        {% elif card.tier_class == 'warning' %}Partial Match
+                        {% else %}Low Relevance{% endif %}
+                      {% endif %}
                     </span>
-                  </div>
-                  {% if card.state and card.state != '—' %}
-                  <div class="small text-muted">
-                    <i class="bi bi-geo-alt me-1"></i>{{ card.state }}
-                  </div>
-                  {% endif %}
-                </div>
-              </div>
+                   </div>
+                   {% if card.state and card.state != '—' %}
+                   <div class="small text-muted">
+                     <i class="bi bi-geo-alt me-1"></i>{{ card.state }}
+                   </div>
+                   {% endif %}
+                 </div>
+               </div>
 
               <!-- Confidence bar -->
               <div class="mb-3">
                 <div class="d-flex justify-content-between small mb-1">
-                  <span class="text-muted">Match confidence</span>
+                  <span class="text-muted">{% if lang == 'hi' %}मिलान विश्वसनीयता{% else %}Match confidence{% endif %}</span>
                   <span class="fw-semibold text-{{ card.tier_class }}">{{ card.confidence_pct }}%</span>
                 </div>
                 <div class="progress" style="height:5px">
@@ -184,7 +233,7 @@
                 <div class="col-12">
                   <div class="detail-pill p-2 rounded-3 bg-light">
                     <div class="x-small text-muted fw-semibold mb-1">
-                      <i class="bi bi-gift me-1"></i>BENEFIT
+                      <i class="bi bi-gift me-1"></i>{% if lang == 'hi' %}मिलने वाला लाभ{% else %}BENEFIT{% endif %}
                     </div>
                     <div class="small fw-semibold text-success">{{ card.benefit }}</div>
                   </div>
@@ -192,7 +241,7 @@
                 <div class="col-12">
                   <div class="detail-pill p-2 rounded-3 bg-light">
                     <div class="x-small text-muted fw-semibold mb-1">
-                      <i class="bi bi-check2-circle me-1"></i>WHY YOU QUALIFY
+                      <i class="bi bi-check2-circle me-1"></i>{% if lang == 'hi' %}आप क्यों पात्र हैं{% else %}WHY YOU QUALIFY{% endif %}
                     </div>
                     <div class="small text-dark">{{ card.why_eligible }}</div>
                   </div>
@@ -212,12 +261,13 @@
                 {% if card.application_url and card.application_url != '#' %}
                 <a href="{{ card.application_url }}" target="_blank" rel="noopener"
                    class="btn btn-saffron btn-sm px-3">
-                  <i class="bi bi-box-arrow-up-right me-1"></i>Apply Now
+                  <i class="bi bi-box-arrow-up-right me-1"></i>
+                  {% if lang == 'hi' %}अभी आवेदन करें{% else %}Apply Now{% endif %}
                 </a>
                 {% endif %}
                 <a href="https://locator.csccloud.in/" target="_blank" rel="noopener"
                    class="btn btn-outline-success btn-sm px-3"
-                   title="Find a CSC center near you to apply offline with free help">
+                   title="{% if lang == 'hi' %}CSC केंद्र से मुफ्त आवेदन करें{% else %}Find a CSC center near you to apply offline with free help{% endif %}">
                   <i class="bi bi-shop-window me-1"></i>
                   {% if lang == 'hi' %}CSC केंद्र खोजें{% else %}Find CSC Center{% endif %}
                 </a>
@@ -233,12 +283,12 @@
             <div class="empty-state-icon mb-4">
               <i class="bi bi-search fs-1 text-muted"></i>
             </div>
-            <h3 class="h5 fw-bold text-dark mb-2">No schemes found</h3>
+            <h3 class="h5 fw-bold text-dark mb-2">{% if lang == 'hi' %}कोई योजना नहीं मिली{% else %}No schemes found{% endif %}</h3>
             <p class="text-muted mb-4">
-              The index may be empty. Make sure you've run the data pipeline first.
+              {% if lang == 'hi' %}डेटा पाइपलाइन चलाएं — ChromaDB इंडेक्स खाली हो सकता है।{% else %}The index may be empty. Make sure you've run the data pipeline first.{% endif %}
             </p>
             <a href="{% url 'finder:find' %}" class="btn btn-saffron">
-              <i class="bi bi-arrow-repeat me-1"></i>Try Again
+              <i class="bi bi-arrow-repeat me-1"></i>{% if lang == 'hi' %}दोबारा खोजें{% else %}Try Again{% endif %}
             </a>
           </div>
         {% endif %}
@@ -251,13 +301,13 @@
         <!-- Quick actions -->
         <div class="card shadow-sm border-0 rounded-4 mb-4">
           <div class="card-body p-4">
-            <h3 class="h6 fw-bold mb-3"><i class="bi bi-lightning me-2 text-saffron"></i>Quick Actions</h3>
+            <h3 class="h6 fw-bold mb-3"><i class="bi bi-lightning me-2 text-saffron"></i>{% if lang == 'hi' %}त्वरित कार्रवाई{% else %}Quick Actions{% endif %}</h3>
             <div class="d-grid gap-2">
               <a href="{% url 'finder:find' %}" class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-arrow-repeat me-1"></i>Search Again
+                <i class="bi bi-arrow-repeat me-1"></i>{% if lang == 'hi' %}दोबारा खोजें{% else %}Search Again{% endif %}
               </a>
               <a href="{% url 'finder:home' %}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-house me-1"></i>Back to Home
+                <i class="bi bi-house me-1"></i>{% if lang == 'hi' %}होम पर जाएं{% else %}Back to Home{% endif %}
               </a>
             </div>
           </div>
@@ -266,7 +316,7 @@
         <!-- Match breakdown donut -->
         <div class="card shadow-sm border-0 rounded-4 mb-4">
           <div class="card-body p-4">
-            <h3 class="h6 fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-saffron"></i>Match Breakdown</h3>
+            <h3 class="h6 fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-saffron"></i>{% if lang == 'hi' %}मिलान विवरण{% else %}Match Breakdown{% endif %}</h3>
             {% for card in cards %}
             <div class="mb-2">
               <div class="d-flex justify-content-between small mb-1">
@@ -278,7 +328,7 @@
               </div>
             </div>
             {% empty %}
-            <p class="text-muted small mb-0">No results to display.</p>
+            <p class="text-muted small mb-0">{% if lang == 'hi' %}प्रदर्शित करने के लिए कोई परिणाम नहीं।{% else %}No results to display.{% endif %}</p>
             {% endfor %}
           </div>
         </div>
@@ -287,11 +337,16 @@
         <div class="card border-0 rounded-4 bg-saffron-subtle">
           <div class="card-body p-4">
             <h3 class="h6 fw-bold text-saffron mb-2">
-              <i class="bi bi-lightbulb-fill me-1"></i>💡 Pro Tip
+              <i class="bi bi-lightbulb-fill me-1"></i>
+              {% if lang == 'hi' %}💡 महत्वपूर्ण सलाह{% else %}💡 Pro Tip{% endif %}
             </h3>
             <p class="small text-dark mb-0">
-              Always verify your eligibility on the official government portal
-              before applying. Criteria can change without notice.
+              {% if lang == 'hi' %}
+                आवेदन करने से पहले हमेशा आधिकारिक सरकारी पोर्टल पर अपनी पात्रता जाँचें। मानदंड बिना सूचना के बदल सकते हैं।
+              {% else %}
+                Always verify your eligibility on the official government portal
+                before applying. Criteria can change without notice.
+              {% endif %}
             </p>
           </div>
         </div>
@@ -303,30 +358,54 @@
 {% endblock %}
 
 {% block extra_js %}
+
 <script>
-// Render the LLM answer markdown using marked.js
-document.addEventListener('DOMContentLoaded', function() {
-  const el = document.getElementById('aiAnswerText');
-  if (el && typeof marked !== 'undefined') {
-    const raw = el.getAttribute('data-raw') || '';
+document.addEventListener('DOMContentLoaded', function () {
+
+  // ── Render AI answer ────────────────────────────────────────────────────
+  // We read the text from a <script type="application/json"> tag instead of
+  // a data-* attribute.  This prevents Django's escapejs filter from turning
+  // newlines into the literal six-character string \u000A which then shows
+  // as visible text in the browser instead of being interpreted as whitespace.
+  const rawScript = document.getElementById('aiAnswerRaw');
+  const el        = document.getElementById('aiAnswerText');
+
+  if (rawScript && el && typeof marked !== 'undefined') {
+    // The script tag body is a JSON-quoted string; parse it to get the real text.
+    let raw = '';
+    try {
+      raw = JSON.parse('"' + rawScript.textContent.trim() + '"');
+    } catch (e) {
+      // Fallback: use the raw text as-is if JSON parsing fails
+      raw = rawScript.textContent.trim();
+    }
+
     if (raw.trim()) {
+      // Configure marked: support line breaks and GitHub-flavoured markdown
       marked.setOptions({ breaks: true, gfm: true });
       el.innerHTML = marked.parse(raw);
+
+      // Make every link open in a new tab
+      el.querySelectorAll('a').forEach(function (a) {
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+      });
     }
   }
 
-  // Animate all progress bars smoothly on page load
-  document.querySelectorAll('.progress-bar').forEach(function(bar) {
+  // ── Progress bar entrance animation ─────────────────────────────────────
+  document.querySelectorAll('.progress-bar').forEach(function (bar) {
     const target = bar.style.width;
     bar.style.width = '0%';
     bar.style.transition = 'none';
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
         bar.style.transition = 'width 1s ease 0.2s';
         bar.style.width = target;
       });
     });
   });
+
 });
 </script>
 {% endblock %}

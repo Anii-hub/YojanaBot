@@ -57,6 +57,7 @@ except ImportError:
 DEFAULT_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
 DEFAULT_TOP_K = 5
 
+# ── English prompts ──────────────────────────────────────────────────────────
 SYSTEM_PROMPT = """\
 You are an expert Indian government scheme advisor. Your ONLY job is to help \
 citizens understand which government schemes they are eligible for.
@@ -69,10 +70,10 @@ STRICT RULES you must always follow:
 3. NEVER invent, extrapolate, or assume eligibility criteria not present in the context.
 4. If a scheme is not clearly applicable to the user, omit it entirely.
 5. Structure your answer as a numbered list. Each item must include:
-   - Scheme Name
-   - What benefit the user gets
-   - Why they are eligible (match the user's profile fields to scheme criteria)
-   - Application link (from the document)
+   - Scheme Name (योजना का नाम)
+   - Benefit: what the user receives
+   - Why Eligible: how the user's profile matches the scheme criteria
+   - Apply: the application link from the document
 6. End with a brief note if some schemes could not be confirmed due to incomplete data.
 """
 
@@ -86,6 +87,42 @@ HUMAN_PROMPT = """\
 ## Task
 Based ONLY on the scheme documents above, list all government schemes this \
 user is eligible for. Follow the strict rules from the system prompt exactly.
+"""
+
+# ── Hindi prompts — used when lang='hi' ──────────────────────────────────────
+# The LLM writes the entire answer in Hindi natively.
+# This gives far better quality than English → post-hoc machine translation.
+SYSTEM_PROMPT_HI = """\
+आप एक विशेषज्ञ भारतीय सरकारी योजना सलाहकार हैं। आपका काम नागरिकों को यह बताना है \
+कि वे किन सरकारी योजनाओं के लिए पात्र हैं।
+
+कड़े नियम जिनका आपको हमेशा पालन करना है:
+1. उत्तर केवल नीचे दिए गए योजना दस्तावेज़ों के आधार पर दें।
+2. हर योजना के लिए आपको अवश्य बताना है:
+   क. योजना का सटीक नाम (जैसा दस्तावेज़ में है)
+   ख. आवेदन लिंक या PDF URL
+3. कभी भी कोई पात्रता मानदंड मत बनाएं जो दस्तावेज़ में नहीं है।
+4. अगर कोई योजना उपयोगकर्ता पर स्पष्ट रूप से लागू नहीं होती तो उसे छोड़ दें।
+5. उत्तर को क्रमांकित सूची के रूप में लिखें। हर योजना में शामिल करें:
+   - **योजना का नाम**
+   - **लाभ**: उपयोगकर्ता को क्या मिलेगा
+   - **पात्रता**: प्रोफ़ाइल के कौन से क्षेत्र योजना की शर्तों से मेल खाते हैं
+   - **आवेदन करें**: दस्तावेज़ से आवेदन लिंक
+6. अंत में संक्षिप्त नोट लिखें यदि कुछ योजनाओं की पुष्टि अपूर्ण डेटा के कारण नहीं हो सकी।
+पूरा उत्तर हिंदी में लिखें।
+"""
+
+HUMAN_PROMPT_HI = """\
+## उपयोगकर्ता की प्रोफ़ाइल
+{profile_summary}
+
+## प्राप्त योजना दस्तावेज़
+{context}
+
+## कार्य
+केवल ऊपर दिए गए योजना दस्तावेज़ों के आधार पर बताएं कि यह उपयोगकर्ता किन \
+सरकारी योजनाओं के लिए पात्र है। सिस्टम प्रॉम्प्ट के सभी नियमों का पालन करें। \
+पूरा उत्तर हिंदी में लिखें।
 """
 
 
@@ -190,8 +227,15 @@ def _call_groq(
     profile_summary: str,
     context: str,
     model_name: str = DEFAULT_MODEL,
+    lang: str = "en",
 ) -> str:
-    """Build LangChain chain and invoke Groq LLM."""
+    """
+    Build LangChain chain and invoke Groq LLM.
+
+    When lang='hi' the Hindi prompt pair is used so the LLM writes its entire
+    answer in Hindi natively — this produces far better quality than translating
+    English output afterwards with a machine-translation API.
+    """
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         raise EnvironmentError(
@@ -210,9 +254,13 @@ def _call_groq(
         max_retries=2,
     )
 
+    # Pick prompt language — Hindi prompt instructs the LLM to write fully in Hindi
+    sys_prompt  = SYSTEM_PROMPT_HI if lang == "hi" else SYSTEM_PROMPT
+    human_prompt = HUMAN_PROMPT_HI  if lang == "hi" else HUMAN_PROMPT
+
     prompt = ChatPromptTemplate.from_messages([
-        ("system", SYSTEM_PROMPT),
-        ("human", HUMAN_PROMPT),
+        ("system", sys_prompt),
+        ("human",  human_prompt),
     ])
 
     chain = prompt | llm | StrOutputParser()
@@ -228,6 +276,7 @@ def run_rag_pipeline(
     vector_store: Any,  # SchemeVectorStore
     top_k: int = DEFAULT_TOP_K,
     model_name: str = DEFAULT_MODEL,
+    lang: str = "en",
 ) -> RAGResponse:
     """
     Full RAG pipeline:
@@ -279,7 +328,9 @@ def run_rag_pipeline(
         )
 
     try:
-        answer = _call_groq(profile_summary, context, model_name)
+        # Pass lang so the LLM writes natively in Hindi when requested —
+        # no post-hoc machine translation needed for the AI analysis section.
+        answer = _call_groq(profile_summary, context, model_name, lang=lang)
         return RAGResponse(
             profile=user_profile,
             retrieved_schemes=schemes,

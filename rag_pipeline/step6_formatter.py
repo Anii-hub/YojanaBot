@@ -275,30 +275,114 @@ class SchemeCard:
     source_pdf_url: str
 
 
-def build_scheme_cards(response: "RAGResponse") -> list[SchemeCard]:
+# ---------------------------------------------------------------------------
+# Hindi translation helpers for card data
+# ---------------------------------------------------------------------------
+
+# Maps the English field keys that appear in matched_criteria to Hindi labels.
+# e.g. "state=Uttar Pradesh" → "राज्य=Uttar Pradesh"
+_CRITERIA_LABELS_HI: dict[str, str] = {
+    "state":       "राज्य",
+    "age":         "आयु",
+    "income":      "आय",
+    "gender":      "लिंग",
+    "caste":       "जाति",
+    "occupation":  "व्यवसाय",
+    "semantic match": "प्रासंगिक",
+}
+
+# Common warning substrings → Hindi equivalents
+_WARNING_MAP_HI: list[tuple[str, str]] = [
+    ("state mismatch",   "राज्य बेमेल"),
+    ("age outside",      "आयु सीमा से बाहर"),
+    ("income exceeds",   "आय सीमा से अधिक"),
+    ("gender mismatch",  "लिंग बेमेल"),
+    ("occupation",       "व्यवसाय"),
+    ("scheme is for",    "योजना के लिए"),
+    ("All India",        "सम्पूर्ण भारत"),
+]
+
+
+def _translate_criterion_hi(criterion: str) -> str:
+    """Translate a single matched-criterion string to Hindi labels.
+
+    e.g. "state=Uttar Pradesh" → "राज्य=Uttar Pradesh"
+         "income<=Rs.500000"   → "आय<=₹500000"
+         "semantic match"       → "प्रासंगिक"
+    """
+    low = criterion.lower()
+    for eng, hin in _CRITERIA_LABELS_HI.items():
+        if low.startswith(eng):
+            rest = criterion[len(eng):]          # keep "=...", "<="...", etc.
+            rest = rest.replace("Rs.", "₹")
+            return hin + rest
+    # No match — return as-is (scheme names, numeric values are kept)
+    return criterion
+
+
+def _translate_warning_hi(warning: str) -> str:
+    """Best-effort translation of a warning string to Hindi."""
+    result = warning
+    for eng, hin in _WARNING_MAP_HI:
+        result = result.replace(eng, hin)
+    result = result.replace("Rs.", "₹")
+    return result
+
+
+def build_scheme_cards(response: "RAGResponse", lang: str = "en") -> list[SchemeCard]:
     """
     Convert a RAGResponse into a list of SchemeCard objects.
 
     This is the bridge between the RAG pipeline and any web/API layer.
+
+    Args:
+        response: RAGResponse from run_rag_pipeline().
+        lang:     "en" or "hi".  When "hi", the why_eligible text, warnings,
+                  and fallback strings are translated to Hindi so the scheme
+                  cards are fully Hindi for a Hindi-speaking user.
     """
+    # Language-specific strings
+    if lang == "hi":
+        matched_prefix   = "मिलान:"
+        fallback_why     = "आपकी प्रोफ़ाइल से प्रासंगिक"
+        fallback_benefit = "योजना दस्तावेज़ देखें"
+        fallback_scheme  = "अज्ञात योजना"
+    else:
+        matched_prefix   = "Matched:"
+        fallback_why     = "Semantically relevant to your profile"
+        fallback_benefit = "See scheme document"
+        fallback_scheme  = "Unknown Scheme"
+
     cards = []
     for idx, scheme in enumerate(response.retrieved_schemes, start=1):
         meta = scheme.metadata
         tier_label, _ = _tier(scheme.final_score)
-        why = (
-            f"Matched: {', '.join(scheme.matched_criteria)}"
-            if scheme.matched_criteria
-            else "Semantically relevant to your profile"
-        )
+
+        # Build why_eligible text
+        if scheme.matched_criteria:
+            if lang == "hi":
+                translated = [_translate_criterion_hi(c) for c in scheme.matched_criteria]
+            else:
+                translated = scheme.matched_criteria
+            why = f"{matched_prefix} {', '.join(translated)}"
+        else:
+            why = fallback_why
+
+        # Translate warnings when Hindi requested
+        if lang == "hi":
+            warnings = [_translate_warning_hi(w) for w in scheme.eligibility_warnings]
+        else:
+            warnings = scheme.eligibility_warnings
+
         cards.append(SchemeCard(
             rank=idx,
-            scheme_name=scheme.scheme_name or "Unknown Scheme",
-            benefit=meta.get("benefit_amount") or meta.get("benefit_text") or "See scheme document",
+            scheme_name=scheme.scheme_name or fallback_scheme,
+            benefit=meta.get("benefit_amount") or meta.get("benefit_text") or fallback_benefit,
             why_eligible=why,
             application_url=meta.get("application_url") or meta.get("source_pdf_url") or "#",
             confidence_tier=tier_label,
             confidence_score=round(scheme.final_score, 4),
-            warnings=scheme.eligibility_warnings,
+            warnings=warnings,
             state=meta.get("state") or "—",
             source_pdf_url=meta.get("source_pdf_url") or "#",
         ))
