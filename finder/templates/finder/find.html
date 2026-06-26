@@ -1,280 +1,68 @@
 {% extends "finder/base.html" %}
-{% load static %}
 
-{% block title %}Check Eligibility — YojanaBot{% endblock %}
-{% block meta_description %}Fill in your profile to find all government schemes you are eligible for.{% endblock %}
+{% block title %}{% if lang == 'hi' %}योजना खोजें — YojanaBot{% else %}Find Schemes — YojanaBot{% endif %}{% endblock %}
+{% block meta_description %}{% if lang == 'hi' %}हिंदी या अंग्रेजी में अपने बारे में बताएं और सरकारी योजनाएं खोजें।{% else %}Describe yourself in Hindi or English to find matching government schemes.{% endif %}{% endblock %}
 
 {% block content %}
 <section class="py-5 bg-light-india min-vh-100">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8 col-xl-7">
-
-        <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'finder:home' %}" data-en="Home" data-hi="होम">Home</a></li>
-            <li class="breadcrumb-item active" data-en="Find Schemes" data-hi="योजनाएँ खोजें">Find Schemes</li>
+            <li class="breadcrumb-item"><a href="{% url 'finder:home' %}">{% if lang == 'hi' %}होम{% else %}Home{% endif %}</a></li>
+            <li class="breadcrumb-item active">{% if lang == 'hi' %}योजना खोजें{% else %}Find Schemes{% endif %}</li>
           </ol>
         </nav>
 
-        <!-- Form Card -->
         <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-
-          <!-- Card Header -->
           <div class="card-header-gradient p-4 text-white">
             <div class="d-flex align-items-center gap-3">
               <div class="header-icon-circle">
-                <i class="bi bi-person-fill-check fs-3"></i>
+                <i class="bi bi-search fs-3"></i>
               </div>
               <div>
-                <h1 class="h3 fw-bold mb-1" data-en="Your Eligibility Profile" data-hi="आपकी पात्रता प्रोफ़ाइल">Your Eligibility Profile</h1>
-                <p class="mb-0 text-white-75 small" data-en="Answer 6 questions · Takes ~90 seconds · 100% Free" data-hi="6 सवालों के जवाब दें · लगभग 90 सेकंड · बिल्कुल मुफ़्त">
-                  Answer 6 questions · Takes ~90 seconds · 100% Free
+                <h1 class="h3 fw-bold mb-1">{% if lang == 'hi' %}अपने बारे में बताएं{% else %}Describe Yourself{% endif %}</h1>
+                <p class="mb-0 text-white-75 small">
+                  {% if lang == 'hi' %}
+                    हिंदी या अंग्रेजी में लिखें। राज्य, उम्र, आय, जाति, पेशा — जो भी प्रासंगिक हो।
+                  {% else %}
+                    Use Hindi or English. Add state, age, income, occupation, caste, or anything relevant.
+                  {% endif %}
                 </p>
               </div>
             </div>
-            <!-- Progress bar (visual only) -->
-            <div class="mt-4">
-              <div class="d-flex justify-content-between small text-white-75 mb-1">
-                <span data-en="Profile completion" data-hi="प्रोफ़ाइल पूर्णता">Profile completion</span>
-                <span id="completionPct">0%</span>
-              </div>
-              <div class="progress" style="height:6px; background:rgba(255,255,255,0.2)">
-                <div class="progress-bar bg-warning" id="completionBar" style="width:0%; transition:width 0.4s ease"></div>
-              </div>
-            </div>
           </div>
 
-          <!-- Form Body -->
           <div class="card-body p-4 p-md-5">
-            <form method="post" id="eligibilityForm" novalidate>
+            {% if error %}
+              <div class="alert alert-warning" role="alert">{{ error }}</div>
+            {% endif %}
+
+            <form method="post">
               {% csrf_token %}
+              <textarea
+                name="query"
+                rows="4"
+                placeholder="{% if lang == 'hi' %}अपने बारे में लिखें — राज्य, उम्र, आय, जाति, पेशा… हिंदी या अंग्रेजी में{% else %}Describe yourself — state, age, income, occupation, caste... in Hindi or English{% endif %}"
+                class="form-control mb-3"
+                required
+              ></textarea>
 
-              <!-- Language Toggle -->
-              <div class="mb-5">
-                <label class="form-label fw-semibold mb-3">
-                  <i class="bi bi-translate me-2 text-saffron"></i><span data-en="Output Language / आउटपुट भाषा" data-hi="भाषा चुनें / Choose Language">Output Language / आउटपुट भाषा</span>
+              <div class="d-flex gap-3 mb-3 align-items-center">
+                <span class="small fw-semibold text-muted">{% if lang == 'hi' %}भाषा:{% else %}Language:{% endif %}</span>
+                <label class="d-flex align-items-center gap-1">
+                  <input type="radio" name="lang" value="en" {% if lang != 'hi' %}checked{% endif %}> English
                 </label>
-                <div class="d-flex gap-3">
-                  <div class="lang-option flex-grow-1">
-                    <input type="radio" class="btn-check form-check-input" name="lang" id="lang_en" value="en" {% if lang != 'hi' %}checked{% endif %}>
-                    <label class="btn btn-outline-primary w-100 lang-label" for="lang_en">
-                      <span class="d-block fw-bold"> English</span>
-                      <span class="small text-muted">Results in English</span>
-                    </label>
-                  </div>
-                  <div class="lang-option flex-grow-1">
-                    <input type="radio" class="btn-check form-check-input" name="lang" id="lang_hi" value="hi" {% if lang == 'hi' %}checked{% endif %}>
-                    <label class="btn btn-outline-primary w-100 lang-label" for="lang_hi">
-                      <span class="d-block fw-bold"> हिंदी</span>
-                      <span class="small text-muted">परिणाम हिंदी में</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <hr class="my-4 border-light" />
-
-              <!-- Question 1: State -->
-              <div class="mb-4 form-question" data-field="state">
-                <label for="id_state" class="form-label fw-semibold">
-                  <span class="q-num">01</span>
-                  <i class="bi bi-geo-alt-fill ms-2 me-1 text-saffron"></i>
-                  <span data-en="State / Union Territory" data-hi="राज्य / केंद्र शासित प्रदेश">State / Union Territory</span>
+                <label class="d-flex align-items-center gap-1">
+                  <input type="radio" name="lang" value="hi" {% if lang == 'hi' %}checked{% endif %}> हिन्दी
                 </label>
-                <select name="state" id="id_state" class="form-select form-select-lg">
-                  <option value="" data-en="— Select your state —" data-hi="— अपना राज्य चुनें —">— Select your state —</option>
-                  <option value="Andhra Pradesh"       data-en="Andhra Pradesh"       data-hi="आंध्र प्रदेश">Andhra Pradesh</option>
-                  <option value="Arunachal Pradesh"    data-en="Arunachal Pradesh"    data-hi="अरुणाचल प्रदेश">Arunachal Pradesh</option>
-                  <option value="Assam"                data-en="Assam"                data-hi="असम">Assam</option>
-                  <option value="Bihar"                data-en="Bihar"                data-hi="बिहार">Bihar</option>
-                  <option value="Chhattisgarh"         data-en="Chhattisgarh"         data-hi="छत्तीसगढ़">Chhattisgarh</option>
-                  <option value="Delhi"                data-en="Delhi"                data-hi="दिल्ली">Delhi</option>
-                  <option value="Goa"                  data-en="Goa"                  data-hi="गोवा">Goa</option>
-                  <option value="Gujarat"              data-en="Gujarat"              data-hi="गुजरात">Gujarat</option>
-                  <option value="Haryana"              data-en="Haryana"              data-hi="हरियाणा">Haryana</option>
-                  <option value="Himachal Pradesh"     data-en="Himachal Pradesh"     data-hi="हिमाचल प्रदेश">Himachal Pradesh</option>
-                  <option value="Jharkhand"            data-en="Jharkhand"            data-hi="झारखंड">Jharkhand</option>
-                  <option value="Karnataka"            data-en="Karnataka"            data-hi="कर्नाटक">Karnataka</option>
-                  <option value="Kerala"               data-en="Kerala"               data-hi="केरल">Kerala</option>
-                  <option value="Madhya Pradesh"       data-en="Madhya Pradesh"       data-hi="मध्य प्रदेश">Madhya Pradesh</option>
-                  <option value="Maharashtra"          data-en="Maharashtra"          data-hi="महाराष्ट्र">Maharashtra</option>
-                  <option value="Manipur"              data-en="Manipur"              data-hi="मणिपुर">Manipur</option>
-                  <option value="Meghalaya"            data-en="Meghalaya"            data-hi="मेघालय">Meghalaya</option>
-                  <option value="Mizoram"              data-en="Mizoram"              data-hi="मिजोरम">Mizoram</option>
-                  <option value="Nagaland"             data-en="Nagaland"             data-hi="नागालैंड">Nagaland</option>
-                  <option value="Odisha"               data-en="Odisha"               data-hi="ओडिशा">Odisha</option>
-                  <option value="Punjab"               data-en="Punjab"               data-hi="पंजाब">Punjab</option>
-                  <option value="Rajasthan"            data-en="Rajasthan"            data-hi="राजस्थान">Rajasthan</option>
-                  <option value="Sikkim"               data-en="Sikkim"               data-hi="सिक्किम">Sikkim</option>
-                  <option value="Tamil Nadu"           data-en="Tamil Nadu"           data-hi="तमिलनाडु">Tamil Nadu</option>
-                  <option value="Telangana"            data-en="Telangana"            data-hi="तेलंगाना">Telangana</option>
-                  <option value="Tripura"              data-en="Tripura"              data-hi="त्रिपुरा">Tripura</option>
-                  <option value="Uttar Pradesh"        data-en="Uttar Pradesh"        data-hi="उत्तर प्रदेश">Uttar Pradesh</option>
-                  <option value="Uttarakhand"          data-en="Uttarakhand"          data-hi="उत्तराखंड">Uttarakhand</option>
-                  <option value="West Bengal"          data-en="West Bengal"          data-hi="पश्चिम बंगाल">West Bengal</option>
-                  <option value="Jammu and Kashmir"    data-en="Jammu and Kashmir"    data-hi="जम्मू और कश्मीर">Jammu and Kashmir</option>
-                  <option value="Ladakh"               data-en="Ladakh"               data-hi="लद्दाख">Ladakh</option>
-                  <option value="Chandigarh"           data-en="Chandigarh"           data-hi="चंडीगढ़">Chandigarh</option>
-                  <option value="Puducherry"           data-en="Puducherry"           data-hi="पुडुचेरी">Puducherry</option>
-                </select>
-                {% if form.state.errors %}
-                  <div class="invalid-feedback d-block">{{ form.state.errors.0 }}</div>
-                {% endif %}
-                <div class="form-text" data-en="Select the state where you currently reside." data-hi="वह राज्य चुनें जहाँ आप अभी रहते हैं।">Select the state where you currently reside.</div>
               </div>
 
-              <!-- Question 2: Age -->
-              <div class="mb-4 form-question" data-field="age">
-                <label for="id_age" class="form-label fw-semibold">
-                  <span class="q-num">02</span>
-                  <i class="bi bi-calendar3 ms-2 me-1 text-saffron"></i>
-                  <span data-en="Your Age" data-hi="आपकी आयु">Your Age</span>
-                </label>
-                <input type="number" name="age" id="id_age" class="form-control form-control-lg"
-                       min="0" max="120"
-                       data-placeholder-en="e.g. 28" data-placeholder-hi="उदा. 28"
-                       placeholder="e.g. 28">
-                {% if form.age.errors %}
-                  <div class="invalid-feedback d-block">{{ form.age.errors.0 }}</div>
-                {% endif %}
-              </div>
-
-              <!-- Question 3: Gender -->
-              <div class="mb-4 form-question" data-field="gender">
-                <label for="id_gender" class="form-label fw-semibold">
-                  <span class="q-num">03</span>
-                  <i class="bi bi-person-fill ms-2 me-1 text-saffron"></i>
-                  <span data-en="Gender" data-hi="लिंग">Gender</span>
-                </label>
-                <select name="gender" id="id_gender" class="form-select form-select-lg">
-                  <option value="" data-en="— Select gender —" data-hi="— लिंग चुनें —">— Select gender —</option>
-                  <option value="male" data-en="Male" data-hi="पुरुष">Male</option>
-                  <option value="female" data-en="Female" data-hi="महिला">Female</option>
-                  <option value="other" data-en="Other / Prefer not to say" data-hi="अन्य / बताना नहीं चाहते">Other / Prefer not to say</option>
-                </select>
-                {% if form.gender.errors %}
-                  <div class="invalid-feedback d-block">{{ form.gender.errors.0 }}</div>
-                {% endif %}
-              </div>
-
-              <!-- Question 4: Income -->
-              <div class="mb-4 form-question" data-field="annual_income">
-                <label for="id_annual_income" class="form-label fw-semibold">
-                  <span class="q-num">04</span>
-                  <i class="bi bi-currency-rupee ms-2 me-1 text-saffron"></i>
-                  <span data-en="Annual Family Income (₹)" data-hi="वार्षिक पारिवारिक आय (₹)">Annual Family Income (₹)</span>
-                </label>
-                <div class="input-group input-group-lg">
-                  <span class="input-group-text fw-bold text-saffron bg-light">₹</span>
-                  <input type="number" name="annual_income" id="id_annual_income" class="form-control form-control-lg"
-                         min="0" max="100000000"
-                         data-placeholder-en="e.g. 120000" data-placeholder-hi="उदा. 120000"
-                         placeholder="e.g. 120000">
-                </div>
-                {% if form.annual_income.errors %}
-                  <div class="invalid-feedback d-block">{{ form.annual_income.errors.0 }}</div>
-                {% endif %}
-                <div class="form-text"
-                     data-en="Enter the total annual income of your household in Indian Rupees."
-                     data-hi="अपने परिवार की कुल वार्षिक आय रुपयों में दर्ज करें।">
-                  Enter the total annual income of your household in Indian Rupees.
-                </div>
-
-                <!-- Quick fill income buttons -->
-                <div class="d-flex flex-wrap gap-2 mt-2">
-                  {% for val, lbl in income_hints %}
-                  <button type="button" class="btn btn-sm btn-outline-secondary income-hint"
-                          data-value="{{ val }}">{{ lbl }}</button>
-                  {% endfor %}
-                </div>
-              </div>
-
-              <!-- Question 5: Caste -->
-              <div class="mb-4 form-question" data-field="caste_category">
-                <label for="id_caste_category" class="form-label fw-semibold">
-                  <span class="q-num">05</span>
-                  <i class="bi bi-people-fill ms-2 me-1 text-saffron"></i>
-                  <span data-en="Caste / Social Category" data-hi="जाति / सामाजिक श्रेणी">Caste / Social Category</span>
-                </label>
-                <select name="caste_category" id="id_caste_category" class="form-select form-select-lg">
-                  <option value="" data-en="— Select category —" data-hi="— श्रेणी चुनें —">— Select category —</option>
-                  <option value="General" data-en="General" data-hi="सामान्य">General</option>
-                  <option value="OBC" data-en="OBC (Other Backward Class)" data-hi="ओबीसी (अन्य पिछड़ा वर्ग)">OBC (Other Backward Class)</option>
-                  <option value="SC" data-en="SC (Scheduled Caste)" data-hi="एससी (अनुसूचित जाति)">SC (Scheduled Caste)</option>
-                  <option value="ST" data-en="ST (Scheduled Tribe)" data-hi="एसटी (अनुसूचित जनजाति)">ST (Scheduled Tribe)</option>
-                  <option value="Minority" data-en="Minority" data-hi="अल्पसंख्यक">Minority</option>
-                </select>
-                {% if form.caste_category.errors %}
-                  <div class="invalid-feedback d-block">{{ form.caste_category.errors.0 }}</div>
-                {% endif %}
-              </div>
-
-              <!-- Question 6: Occupation -->
-              <div class="mb-5 form-question" data-field="occupation_type">
-                <label for="id_occupation_type" class="form-label fw-semibold">
-                  <span class="q-num">06</span>
-                  <i class="bi bi-briefcase-fill ms-2 me-1 text-saffron"></i>
-                  <span data-en="Primary Occupation" data-hi="मुख्य व्यवसाय">Primary Occupation</span>
-                </label>
-                <select name="occupation_type" id="id_occupation_type" class="form-select form-select-lg">
-                  <option value="" data-en="— Select occupation —" data-hi="— व्यवसाय चुनें —">— Select occupation —</option>
-                  <option value="farmer" data-en="Farmer / Agricultural Worker" data-hi="किसान / कृषि मजदूर">Farmer / Agricultural Worker</option>
-                  <option value="student" data-en="Student" data-hi="छात्र / छात्रा">Student</option>
-                  <option value="woman entrepreneur" data-en="Woman Entrepreneur / Self-Employed" data-hi="महिला उद्यमी / स्व-रोज़गार">Woman Entrepreneur / Self-Employed</option>
-                  <option value="senior citizen" data-en="Senior Citizen" data-hi="वरिष्ठ नागरिक">Senior Citizen</option>
-                  <option value="differently abled" data-en="Differently Abled (Divyang)" data-hi="दिव्यांग">Differently Abled (Divyang)</option>
-                  <option value="worker" data-en="Worker / Labourer" data-hi="मजदूर / श्रमिक">Worker / Labourer</option>
-                  <option value="other" data-en="Other" data-hi="अन्य">Other</option>
-                </select>
-                {% if form.occupation_type.errors %}
-                  <div class="invalid-feedback d-block">{{ form.occupation_type.errors.0 }}</div>
-                {% endif %}
-              </div>
-
-              <!-- Submit -->
-              <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-saffron btn-lg fw-bold py-3" id="submitBtn">
-                  <i class="bi bi-stars me-2"></i><span id="submitBtnText" data-en="Find My Eligible Schemes" data-hi="मेरी पात्र योजनाएँ खोजें">Find My Eligible Schemes</span>
-                  <span class="spinner-border spinner-border-sm ms-2 d-none" id="submitSpinner"></span>
-                </button>
-                <a href="{% url 'finder:home' %}" class="btn btn-outline-secondary" id="backHomeBtn">
-                  <i class="bi bi-arrow-left me-1"></i><span data-en="Back to Home" data-hi="होम पर वापस जाएँ">Back to Home</span>
-                </a>
-              </div>
-
-              <div class="text-center mt-4 small text-muted">
-                <i class="bi bi-shield-check me-1 text-success"></i>
-                <span data-en="Your information is never stored or shared." data-hi="आपकी जानकारी कभी भी संग्रहीत या साझा नहीं की जाती।">Your information is never stored or shared.</span>
-              </div>
-
+              <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                <i class="bi bi-stars me-2"></i>{% if lang == 'hi' %}योजनाएं खोजें{% else %}Find Schemes{% endif %}
+              </button>
             </form>
-          </div>
-        </div>
-
-        <!-- Info pills -->
-        <div class="row g-3 mt-4">
-          <div class="col-4 text-center">
-            <div class="info-pill p-3 rounded-3">
-              <i class="bi bi-lightning-fill text-warning fs-4"></i>
-              <div class="small mt-1 fw-semibold">~30 sec</div>
-              <div class="x-small text-muted" data-en="Search time" data-hi="खोज समय">Search time</div>
-            </div>
-          </div>
-          <div class="col-4 text-center">
-            <div class="info-pill p-3 rounded-3">
-              <i class="bi bi-translate text-primary fs-4"></i>
-              <div class="small mt-1 fw-semibold">En / हिं</div>
-              <div class="x-small text-muted" data-en="Bilingual" data-hi="द्विभाषी">Bilingual</div>
-            </div>
-          </div>
-          <div class="col-4 text-center">
-            <div class="info-pill p-3 rounded-3">
-              <i class="bi bi-link-45deg text-success fs-4"></i>
-              <div class="small mt-1 fw-semibold" data-en="Direct Links" data-hi="सीधे लिंक">Direct Links</div>
-              <div class="x-small text-muted" data-en="Apply instantly" data-hi="तुरंत आवेदन करें">Apply instantly</div>
-            </div>
           </div>
         </div>
 
@@ -282,80 +70,4 @@
     </div>
   </div>
 </section>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// ── Language Translation ───────────────────────────────────────────────────
-function applyLang(lang) {
-  // 1. Translate all [data-en] / [data-hi] text nodes
-  document.querySelectorAll('[data-en]').forEach(el => {
-    el.textContent = lang === 'hi' ? el.dataset.hi : el.dataset.en;
-  });
-
-  // 2. Translate all <option> elements that have data-en / data-hi
-  document.querySelectorAll('option[data-en]').forEach(opt => {
-    opt.textContent = lang === 'hi' ? opt.dataset.hi : opt.dataset.en;
-  });
-
-  // 3. Translate placeholders
-  document.querySelectorAll('[data-placeholder-en]').forEach(el => {
-    el.placeholder = lang === 'hi' ? el.dataset.placeholderHi : el.dataset.placeholderEn;
-  });
-
-  // 4. Keep the submit button icon intact when updating its text span
-  const submitText = document.getElementById('submitBtnText');
-  if (submitText) {
-    submitText.textContent = lang === 'hi' ? 'मेरी पात्र योजनाएँ खोजें' : 'Find My Eligible Schemes';
-  }
-
-  // 5. Update document lang attribute for accessibility
-  document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
-}
-
-// Attach listeners to both radio buttons
-document.getElementById('lang_en').addEventListener('change', () => applyLang('en'));
-document.getElementById('lang_hi').addEventListener('change', () => applyLang('hi'));
-
-// Apply on page load based on server-rendered language
-applyLang(document.getElementById('lang_hi').checked ? 'hi' : 'en');
-
-// ── Progress bar ───────────────────────────────────────────────────────────
-const fields = ['id_state','id_age','id_gender','id_annual_income','id_caste_category','id_occupation_type'];
-const total = fields.length;
-function updateProgress() {
-  let filled = 0;
-  fields.forEach(id => {
-    const el = document.getElementById(id);
-    if (el && el.value && el.value !== '') filled++;
-  });
-  const pct = Math.round((filled / total) * 100);
-  document.getElementById('completionBar').style.width = pct + '%';
-  document.getElementById('completionPct').textContent = pct + '%';
-}
-fields.forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('change', updateProgress);
-  if (el) el.addEventListener('input', updateProgress);
-});
-
-// ── Income quick-fill buttons ──────────────────────────────────────────────
-document.querySelectorAll('.income-hint').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.getElementById('id_annual_income').value = btn.dataset.value;
-    updateProgress();
-  });
-});
-
-// ── Submit spinner ─────────────────────────────────────────────────────────
-document.getElementById('eligibilityForm').addEventListener('submit', () => {
-  const isHindi = document.getElementById('lang_hi').checked;
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  const spinner = document.getElementById('submitSpinner');
-  if (spinner) spinner.classList.remove('d-none');
-  const textSpan = document.getElementById('submitBtnText');
-  if (textSpan) textSpan.textContent = isHindi ? 'योजनाएँ खोजी जा रही हैं…' : 'Searching schemes…';
-});
-</script>
 {% endblock %}

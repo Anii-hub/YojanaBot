@@ -1,5 +1,6 @@
 {% extends "finder/base.html" %}
 {% load static %}
+{% load finder_extras %}
 
 {% block title %}Your Scheme Results — YojanaBot{% endblock %}
 {% block meta_description %}Your personalized government scheme eligibility results.{% endblock %}
@@ -40,9 +41,9 @@
               </h1>
               <p class="mb-0 text-white-75">
                 {% if lang == 'hi' %}
-                  <strong class="text-warning">{{ high_matches }}</strong> उच्च मिलान आपकी प्रोफ़ाइल से
+                  <strong class="text-warning" id="highMatchCount" data-high="1">{{ high_matches }}</strong> उच्च मिलान आपकी प्रोफ़ाइल से
                 {% else %}
-                  <strong class="text-warning">{{ high_matches }}</strong> high match{% if high_matches != 1 %}es{% endif %} for your profile
+                  <strong class="text-warning" id="highMatchCount" data-high="1">{{ high_matches }}</strong> <span id="highMatchLabel">high match{% if high_matches != 1 %}es{% endif %}</span> for your profile
                 {% endif %}
               </p>
             </div>
@@ -60,19 +61,7 @@
           {% endif %}
         </div>
         <div class="col-md-4 mt-4 mt-md-0">
-          <!-- Profile summary card -->
-          <div class="profile-recap-card p-3 rounded-3 bg-white bg-opacity-10 backdrop-blur">
-            <div class="small text-white-75 mb-2 fw-semibold">
-              {% if lang == 'hi' %}आपकी प्रोफ़ाइल{% else %}Your Profile{% endif %}
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-              <span class="badge bg-white text-dark fw-semibold"><i class="bi bi-geo-alt me-1"></i>{{ profile.state }}</span>
-              <span class="badge bg-white text-dark fw-semibold"><i class="bi bi-person me-1"></i>{{ profile.age }}{% if lang == 'hi' %}वर्ष{% else %}yrs{% endif %} · {{ profile.gender|title }}</span>
-              <span class="badge bg-white text-dark fw-semibold"><i class="bi bi-currency-rupee"></i>{{ profile.annual_income_fmt }}</span>
-              <span class="badge bg-white text-dark fw-semibold">{{ profile.caste_category }}</span>
-              <span class="badge bg-white text-dark fw-semibold">{{ profile.occupation_type|title }}</span>
-            </div>
-          </div>
+          <p class="text-white-75 mb-0"><i class="bi bi-search me-1"></i>{% if lang == 'hi' %}आपकी खोज:{% else %}Your search:{% endif %} &ldquo;{{ user_query }}&rdquo;</p>
         </div>
       </div>
     </div>
@@ -166,7 +155,7 @@
               <p class="x-small text-muted mb-0">
                 <i class="bi bi-shield-check me-1 text-success"></i>
                 {% if lang == 'hi' %}
-                  यह उत्तर केवल ऊपर प्राप्त योजना दस्तावेज़ों पर आधारित है। LLM ने कोई जानकारी स्वयं नहीं बनाई है।
+                  यह उत्तर केवल ऊपर प्राप्त योजना दस्तावेज़ों पर आधारित है। AI ने कोई जानकारी स्वयं नहीं बनाई है।
                 {% else %}
                   This answer is grounded strictly on the retrieved scheme documents — the AI cannot invent eligibility criteria.
                 {% endif %}
@@ -240,10 +229,34 @@
                 </div>
                 <div class="col-12">
                   <div class="detail-pill p-2 rounded-3 bg-light">
-                    <div class="x-small text-muted fw-semibold mb-1">
-                      <i class="bi bi-check2-circle me-1"></i>{% if lang == 'hi' %}आप क्यों पात्र हैं{% else %}WHY YOU QUALIFY{% endif %}
+                    <div class="x-small text-muted fw-semibold mb-2">
+                      <i class="bi bi-list-check me-1"></i>{% if lang == 'hi' %}पात्रता मानदंड{% else %}ELIGIBILITY CRITERIA{% endif %}
                     </div>
-                    <div class="small text-dark">{{ card.why_eligible }}</div>
+                    <div class="d-flex flex-wrap gap-1">
+                      {% with criteria=card.why_eligible %}
+                        {% for part in criteria|split:"·" %}
+                          {% with part_stripped=part|strip %}
+                            {% if part_stripped %}
+                              {% if 'Age' in part_stripped or 'आयु' in part_stripped %}
+                                <span class="criteria-tag criteria-age"><i class="bi bi-calendar3 me-1"></i>{{ part_stripped }}</span>
+                              {% elif 'Income' in part_stripped or 'आय' in part_stripped %}
+                                <span class="criteria-tag criteria-income"><i class="bi bi-currency-rupee me-1"></i>{{ part_stripped }}</span>
+                              {% elif 'Caste' in part_stripped or 'जाति' in part_stripped %}
+                                <span class="criteria-tag criteria-caste"><i class="bi bi-people me-1"></i>{{ part_stripped }}</span>
+                              {% elif 'Occupation' in part_stripped or 'व्यवसाय' in part_stripped %}
+                                <span class="criteria-tag criteria-occupation"><i class="bi bi-briefcase me-1"></i>{{ part_stripped }}</span>
+                              {% elif 'State' in part_stripped or 'राज्य' in part_stripped %}
+                                <span class="criteria-tag criteria-state"><i class="bi bi-geo-alt me-1"></i>{{ part_stripped }}</span>
+                              {% else %}
+                                <span class="criteria-tag criteria-other"><i class="bi bi-check2 me-1"></i>{{ part_stripped }}</span>
+                              {% endif %}
+                            {% endif %}
+                          {% endwith %}
+                        {% empty %}
+                          <span class="criteria-tag criteria-other">{{ card.why_eligible }}</span>
+                        {% endfor %}
+                      {% endwith %}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -362,28 +375,219 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-  // ── Render AI answer ────────────────────────────────────────────────────
-  // We read the text from a <script type="application/json"> tag instead of
-  // a data-* attribute.  This prevents Django's escapejs filter from turning
-  // newlines into the literal six-character string \u000A which then shows
-  // as visible text in the browser instead of being interpreted as whitespace.
+  // ── Parse & render AI answer as beautiful structured cards ──────────────
   const rawScript = document.getElementById('aiAnswerRaw');
   const el        = document.getElementById('aiAnswerText');
+  const isHindi   = document.documentElement.lang === 'hi' ||
+                    document.querySelector('span[style*="--saffron"]') !== null ||
+                    '{{ lang }}' === 'hi';
 
-  if (rawScript && el && typeof marked !== 'undefined') {
-    // The script tag body is a JSON-quoted string; parse it to get the real text.
+  // Label maps for EN / HI
+  const L = {
+    benefit:       isHindi ? '🎁 मिलने वाला लाभ'       : '🎁 Benefit',
+    why:           isHindi ? '✅ आप क्यों पात्र हैं'    : '✅ Why You Qualify',
+    doesnt:        isHindi ? '⚠️ पूर्ण मिलान नहीं'      : '⚠️ Doesn\'t Fully Match',
+    apply:         isHindi ? '🔗 आवेदन करें'            : '🔗 Apply',
+    applyBtn:      isHindi ? 'आवेदन करें'               : 'Apply Now',
+    high:          isHindi ? 'उच्च मिलान'              : 'High Match',
+    partial:       isHindi ? 'आंशिक मिलान'             : 'Partial Match',
+    low:           isHindi ? 'कम प्रासंगिक'             : 'Low Relevance',
+    noSchemes:     isHindi ? 'कोई योजना नहीं मिली।'    : 'No schemes found in AI response.',
+  };
+
+  function matchTier(matchVal) {
+    const v = (matchVal || '').toLowerCase();
+    if (v.includes('high') || v.includes('उच्च'))     return { cls: 'success', label: L.high };
+    if (v.includes('partial') || v.includes('आंशिक')) return { cls: 'warning', label: L.partial };
+    return { cls: 'secondary', label: L.low };
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function linkify(text) {
+    // Wrap bare URLs in anchor tags
+    return escHtml(text).replace(
+      /(https?:\/\/[^\s<>"]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer" class="ai-card-link">$1</a>'
+    );
+  }
+
+  function parseBullets(lines) {
+    // Convert "  - item" lines into an array of strings, deduplicating identical bullets
+    const seen = new Set();
+    return lines
+      .filter(l => l.trim().startsWith('-') || l.trim().startsWith('•'))
+      .map(l => l.replace(/^\s*[-•]\s*/, '').trim())
+      .filter(Boolean)
+      .filter(item => {
+        // Deduplicate: normalise to lowercase for comparison
+        const key = item.toLowerCase().replace(/\s+/g, ' ');
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }
+
+  function renderSchemeBlock(block, idx) {
+    const lines = block.split('\n');
+    let scheme = '', match = '', benefit = '', applyUrl = '';
+    const whyLines = [], doesntLines = [];
+    let section = '';
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      // Blank lines do NOT reset section — keep accumulating bullets
+      if (!line) continue;
+
+      // Detect labelled lines (supports both EN and HI labels)
+      // Use strict start-of-line anchors so criterion text like
+      // "Age 18-65 years: ..." is never confused with a section header.
+      if (/^SCHEME\s*:/i.test(line)) {
+        scheme = line.replace(/^SCHEME\s*:\s*/i, '').trim();
+        section = '';
+      } else if (/^MATCH\s*:/i.test(line)) {
+        match = line.replace(/^MATCH\s*:\s*/i, '').trim();
+        section = '';
+      } else if (/^BENEFIT\s*:/i.test(line)) {
+        const inline = line.replace(/^BENEFIT\s*:\s*/i, '').trim();
+        benefit = inline || benefit;
+        section = 'benefit';
+      } else if (/^WHY IT MATCHES?\s*:?/i.test(line)) {
+        section = 'why';
+      } else if (/^DOESN'?T FULLY MATCH\s*:?/i.test(line) || /^DOESNT? FULLY MATCH\s*:?/i.test(line)) {
+        section = 'doesnt';
+      } else if (/^APPLY\s*:/i.test(line)) {
+        applyUrl = line.replace(/^APPLY\s*:\s*/i, '').trim();
+        section = '';
+      } else {
+        // Continuation / bullet lines
+        if (section === 'benefit' && !benefit) benefit = line;
+        if (section === 'why')    whyLines.push(rawLine);
+        if (section === 'doesnt') doesntLines.push(rawLine);
+      }
+    }
+
+    if (!scheme) return ''; // Skip empty blocks
+
+    const tier = matchTier(match);
+    const whyItems   = parseBullets(whyLines);
+    const doesntItems = parseBullets(doesntLines);
+
+    const matchBadge = `<span class="badge rounded-pill bg-${tier.cls} ai-match-badge">
+      ${escHtml(tier.label)}
+    </span>`;
+
+    const benefitHtml = benefit
+      ? `<div class="ai-section ai-benefit">
+           <div class="ai-section-label">${L.benefit}</div>
+           <div class="ai-section-body">${linkify(benefit)}</div>
+         </div>`
+      : '';
+
+    const whyHtml = whyItems.length
+      ? `<div class="ai-section ai-why">
+           <div class="ai-section-label">${L.why}</div>
+           <ul class="ai-bullet-list">
+             ${whyItems.map(i => `<li>${linkify(i)}</li>`).join('')}
+           </ul>
+         </div>`
+      : '';
+
+    const doesntHtml = doesntItems.length
+      ? `<div class="ai-section ai-doesnt">
+           <div class="ai-section-label">${L.doesnt}</div>
+           <ul class="ai-bullet-list ai-doesnt-list">
+             ${doesntItems.map(i => `<li>${linkify(i)}</li>`).join('')}
+           </ul>
+         </div>`
+      : '';
+
+    const isValidUrl = applyUrl && applyUrl !== 'N/A' && /^https?:\/\//i.test(applyUrl);
+    const applyHtml = applyUrl
+      ? `<div class="ai-section ai-apply-row">
+           <div class="ai-section-label">${L.apply}</div>
+           <div class="ai-section-body">
+             ${isValidUrl
+               ? `<a href="${escHtml(applyUrl)}" target="_blank" rel="noopener noreferrer"
+                     class="btn btn-saffron btn-sm px-3 ai-apply-btn">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>${escHtml(L.applyBtn)}
+                  </a>`
+               : `<span class="text-muted small">${linkify(applyUrl)}</span>`
+             }
+           </div>
+         </div>`
+      : '';
+
+    return `
+      <div class="ai-scheme-card" style="animation-delay:${idx * 80}ms">
+        <div class="ai-card-header">
+          <div class="ai-rank-circle">${idx}</div>
+          <div class="ai-card-title">${escHtml(scheme)}</div>
+          ${matchBadge}
+        </div>
+        <div class="ai-card-body">
+          ${benefitHtml}${whyHtml}${doesntHtml}${applyHtml}
+        </div>
+      </div>`;
+  }
+
+  if (rawScript && el) {
     let raw = '';
     try {
       raw = JSON.parse('"' + rawScript.textContent.trim() + '"');
     } catch (e) {
-      // Fallback: use the raw text as-is if JSON parsing fails
       raw = rawScript.textContent.trim();
     }
 
     if (raw.trim()) {
-      // Configure marked: support line breaks and GitHub-flavoured markdown
-      marked.setOptions({ breaks: true, gfm: true });
-      el.innerHTML = marked.parse(raw);
+      // ── Pre-normalise LLM output ──────────────────────────────────
+      // The LLM sometimes emits "--- SCHEME: Foo" (--- as a PREFIX on
+      // the same line as the field label) rather than as a standalone
+      // separator line.  Convert every occurrence of that pattern to:
+      //   \n---\n
+      //   SCHEME: Foo
+      // so our split always works regardless of LLM formatting style.
+      let normalised = raw
+        // "--- SCHEME:" → "\n---\nSCHEME:"
+        .replace(/(^|\n)[ \t]*-{2,}[ \t]*(?=SCHEME[ \t]*:)/gi, '$1\n---\n')
+        // Strip any remaining leading dashes that are NOT followed by text on the same line
+        .replace(/^[ \t]*-{2,}[ \t]*$/gm, '---');
+
+      // Split on standalone "---" lines
+      const blocks = normalised
+        .split(/\n[ \t]*-{3,}[ \t]*\n/)
+        .map(b => b.replace(/^[ \t]*-{2,}[ \t]*\n?/, '').trim()) // strip any leading --- from block 0
+        .filter(Boolean);
+
+      const cards = blocks.map((b, i) => renderSchemeBlock(b, i + 1)).filter(Boolean);
+
+      if (cards.length) {
+        el.innerHTML = `<div class="ai-scheme-list">${cards.join('')}</div>`;
+
+        // ── Update high-match count from AI summary (more accurate) ─
+        // Count AI cards the LLM rated as "High" (bg-success badge)
+        const highCount = el.querySelectorAll('.ai-scheme-card .bg-success').length;
+        const highEl    = document.getElementById('highMatchCount');
+        const labelEl   = document.getElementById('highMatchLabel');
+        if (highEl) highEl.textContent = highCount;
+        if (labelEl) labelEl.textContent = isHindi
+          ? (highCount === 1 ? 'उच्च मिलान' : 'उच्च मिलान')
+          : (highCount === 1 ? 'high match' : 'high matches');
+
+
+      } else {
+        // Fallback: render as plain markdown
+        if (typeof marked !== 'undefined') {
+          marked.setOptions({ breaks: true, gfm: true });
+          el.innerHTML = marked.parse(raw);
+        } else {
+          el.textContent = raw;
+        }
+      }
 
       // Make every link open in a new tab
       el.querySelectorAll('a').forEach(function (a) {

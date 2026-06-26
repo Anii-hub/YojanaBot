@@ -82,32 +82,11 @@ def build_page_content(record: dict[str, Any]) -> str:
 
 
 def build_metadata(record: dict[str, Any]) -> dict[str, Any]:
-    """Build flat metadata fields that Chroma can filter on later."""
-    eligibility = record.get("eligibility") or {}
-    caste_categories = normalize_list(eligibility.get("caste_categories"))
-    occupation_categories = normalize_list(eligibility.get("occupation_categories"))
-
-    metadata = {
-        "scheme_name": normalize_space(record.get("scheme_name")),
-        "ministry": normalize_space(record.get("ministry")) or None,
-        "state": normalize_space(record.get("state")) or None,
-        "age_min": eligibility.get("age_min"),
-        "age_max": eligibility.get("age_max"),
-        "gender": normalize_space(eligibility.get("gender")) or None,
-        "income_limit_annual": eligibility.get("income_limit_annual"),
-        "caste_categories": caste_categories,
-        "caste_categories_csv": ",".join(caste_categories),
-        "occupation_categories": occupation_categories,
-        "occupation_categories_csv": ",".join(occupation_categories),
-        "benefit_amount": normalize_space(record.get("benefit_amount")) or None,
-        "application_url": normalize_space(record.get("application_url")) or None,
-        "source_pdf_url": normalize_space(record.get("source_pdf_url")),
-        "source_page_url": normalize_space(record.get("source_page_url")) or None,
-        "local_pdf_path": normalize_space(record.get("local_pdf_path")) or None,
-        "chunking_strategy": "one_scheme_one_chunk",
+    return {
+        "scheme_name": record.get("scheme_name", ""),
+        "source_pdf_url": record.get("source_pdf_url", ""),
+        "date_indexed": record.get("date_indexed", ""),
     }
-
-    return {key: value for key, value in metadata.items() if value not in ("", None)}
 
 
 def create_scheme_chunk(record: dict[str, Any]) -> SchemeChunk:

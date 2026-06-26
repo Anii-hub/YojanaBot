@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ lang|default:'en' }}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,22 +34,22 @@
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'finder:home' %}">
-            <i class="bi bi-house-fill me-1"></i>Home
+            <i class="bi bi-house-fill me-1"></i>{% if lang == 'hi' %}होम{% else %}Home{% endif %}
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'find' %}active{% endif %}" href="{% url 'finder:find' %}">
-            <i class="bi bi-search me-1"></i>Find Schemes
+            <i class="bi bi-search me-1"></i>{% if lang == 'hi' %}योजना खोजें{% else %}Find Schemes{% endif %}
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'finder:about' %}">
-            <i class="bi bi-info-circle me-1"></i>About
+            <i class="bi bi-info-circle me-1"></i>{% if lang == 'hi' %}हमारे बारे में{% else %}About{% endif %}
           </a>
         </li>
         <li class="nav-item ms-lg-2">
           <a class="btn btn-saffron btn-sm px-3" href="{% url 'finder:find' %}">
-            <i class="bi bi-stars me-1"></i>Check Eligibility
+            <i class="bi bi-stars me-1"></i>{% if lang == 'hi' %}पात्रता जाँचें{% else %}Check Eligibility{% endif %}
           </a>
         </li>
       </ul>
@@ -72,20 +72,25 @@
           <span class="fw-bold fs-5 text-white">YojanaBot</span>
         </div>
         <p class="text-muted small">
-          Free AI-powered government scheme eligibility finder for every Indian citizen.
-          Find central &amp; state schemes you qualify for — in English or Hindi.
+          {% if lang == 'hi' %}
+            हर भारतीय नागरिक के लिए मुफ्त AI-संचालित सरकारी योजना पात्रता खोजक।
+            अंग्रेजी या हिंदी में केंद्र और राज्य की योजनाएं खोजें।
+          {% else %}
+            Free AI-powered government scheme eligibility finder for every Indian citizen.
+            Find central &amp; state schemes you qualify for — in English or Hindi.
+          {% endif %}
         </p>
       </div>
       <div class="col-md-2 offset-md-2">
-        <h6 class="text-white mb-3">Quick Links</h6>
+        <h6 class="text-white mb-3">{% if lang == 'hi' %}त्वरित लिंक{% else %}Quick Links{% endif %}</h6>
         <ul class="list-unstyled small">
-          <li class="mb-1"><a href="{% url 'finder:home' %}" class="footer-link">Home</a></li>
-          <li class="mb-1"><a href="{% url 'finder:find' %}" class="footer-link">Find Schemes</a></li>
-          <li class="mb-1"><a href="{% url 'finder:about' %}" class="footer-link">About</a></li>
+          <li class="mb-1"><a href="{% url 'finder:home' %}" class="footer-link">{% if lang == 'hi' %}होम{% else %}Home{% endif %}</a></li>
+          <li class="mb-1"><a href="{% url 'finder:find' %}" class="footer-link">{% if lang == 'hi' %}योजना खोजें{% else %}Find Schemes{% endif %}</a></li>
+          <li class="mb-1"><a href="{% url 'finder:about' %}" class="footer-link">{% if lang == 'hi' %}हमारे बारे में{% else %}About{% endif %}</a></li>
         </ul>
       </div>
       <div class="col-md-4">
-        <h6 class="text-white mb-3">Official Resources</h6>
+        <h6 class="text-white mb-3">{% if lang == 'hi' %}आधिकारिक संसाधन{% else %}Official Resources{% endif %}</h6>
         <ul class="list-unstyled small">
           <li class="mb-1"><a href="https://www.myscheme.gov.in" target="_blank" rel="noopener" class="footer-link"><i class="bi bi-box-arrow-up-right me-1"></i>MyScheme.gov.in</a></li>
           <li class="mb-1"><a href="https://www.india.gov.in" target="_blank" rel="noopener" class="footer-link"><i class="bi bi-box-arrow-up-right me-1"></i>India.gov.in</a></li>
@@ -96,10 +101,18 @@
     <hr class="border-secondary mt-4" />
     <div class="row align-items-center">
       <div class="col-md-8 small text-muted">
-        ⚠️ For informational purposes only. Always verify eligibility on official government portals.
+        {% if lang == 'hi' %}
+          ⚠️ केवल सूचना के उद्देश्य से। आवेदन से पहले हमेशा आधिकारिक सरकारी पोर्टल पर पात्रता सत्यापित करें।
+        {% else %}
+          ⚠️ For informational purposes only. Always verify eligibility on official government portals.
+        {% endif %}
       </div>
       <div class="col-md-4 text-md-end small text-muted mt-2 mt-md-0">
-        Built with <i class="bi bi-heart-fill text-danger"></i> for India
+        {% if lang == 'hi' %}
+          भारत के लिए <i class="bi bi-heart-fill text-danger"></i> के साथ बनाया गया
+        {% else %}
+          Built with <i class="bi bi-heart-fill text-danger"></i> for India
+        {% endif %}
       </div>
     </div>
   </div>

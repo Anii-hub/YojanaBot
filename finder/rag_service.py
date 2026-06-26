@@ -87,9 +87,9 @@ def store_error() -> str | None:
 # Public search API
 # ---------------------------------------------------------------------------
 
-def find_schemes(profile: dict[str, Any], lang: str = "en") -> dict[str, Any]:
+def find_schemes(user_query: str, lang: str = "en") -> dict[str, Any]:
     """
-    Run the full RAG pipeline for a given user profile.
+    Run the full RAG pipeline for a free-text user description.
     Returns a dict with answer_text, cards, model_used, groq_available, error, lang.
     """
     store = _get_store()
@@ -112,7 +112,7 @@ def find_schemes(profile: dict[str, Any], lang: str = "en") -> dict[str, Any]:
     from rag_pipeline.step7_language import localise_response
 
     response = run_rag_pipeline(
-        user_profile=profile,
+        user_query=user_query,
         vector_store=store,
         top_k=settings.RAG_TOP_K,
         model_name=settings.GROQ_MODEL,
@@ -126,22 +126,11 @@ def find_schemes(profile: dict[str, Any], lang: str = "en") -> dict[str, Any]:
         answer_text = localise_response(answer_text, lang="hi")
 
     cards = build_scheme_cards(response, lang=lang)
-
-    def _hi(text: str) -> str:
-        """Translate a short string to Hindi. Returns original on any failure."""
-        if not text or text in ("—", "#", "See scheme document", "योजना दस्तावेज़ देखें"):
-            return text
-        try:
-            return localise_response(text, lang="hi") or text
-        except Exception:
-            return text
-
     cards_dicts = [
         {
             "rank": c.rank,
-            # Translate scheme name and benefit text when Hindi mode is active
-            "scheme_name": _hi(c.scheme_name) if lang == "hi" else c.scheme_name,
-            "benefit":     _hi(c.benefit)      if lang == "hi" else c.benefit,
+            "scheme_name": c.scheme_name,
+            "benefit": c.benefit,
             "why_eligible": c.why_eligible,
             "application_url": c.application_url,
             "confidence_tier": c.confidence_tier,

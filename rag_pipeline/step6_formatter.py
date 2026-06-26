@@ -28,7 +28,6 @@ import textwrap
 from dataclasses import dataclass
 from typing import Any
 
-import io
 import sys
 
 # Reconfigure stdout for UTF-8 on Windows (PowerShell defaults to cp1252)
@@ -77,10 +76,17 @@ def _dim(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 def _tier(score: float) -> tuple[str, str]:
-    """Return (emoji_label, colour_fn_name) for a given final_score."""
-    if score >= 0.70:
-        return "✅ HIGH MATCH", "green"
+    """Return (emoji_label, colour_fn_name) for a given final_score.
+
+    Thresholds calibrated for paraphrase-multilingual-MiniLM cosine similarity:
+      - Scores from ChromaDB are 1 - cosine_distance (normalised to [0, 1]).
+      - A score of 0.40+ represents a strong semantic overlap → HIGH MATCH.
+      - A score of 0.25–0.40 is moderate relevance → PARTIAL MATCH.
+      - Below 0.25 is weak → LOW RELEVANCE.
+    """
     if score >= 0.40:
+        return "✅ HIGH MATCH", "green"
+    if score >= 0.25:
         return "⚠️  PARTIAL MATCH", "yellow"
     return "❓ LOW RELEVANCE", "red"
 
@@ -329,6 +335,29 @@ def _translate_warning_hi(warning: str) -> str:
     return result
 
 
+def _indian_number(n: int) -> str:
+    """Format an integer in Indian place-value notation with ₹ prefix.
+
+    Examples:
+        200000  → ₹2,00,000
+        500000  → ₹5,00,000
+        1500000 → ₹15,00,000
+        50000   → ₹50,000
+        2500    → ₹2,500
+    """
+    s = str(abs(n))
+    # First group: last 3 digits
+    if len(s) <= 3:
+        return f"₹{s}"
+    result = s[-3:]
+    s = s[:-3]
+    # Subsequent groups: 2 digits each
+    while s:
+        result = s[-2:] + "," + result
+        s = s[:-2]
+    return "₹" + result
+
+
 def build_scheme_cards(response: "RAGResponse", lang: str = "en") -> list[SchemeCard]:
     """
     Convert a RAGResponse into a list of SchemeCard objects.
@@ -343,29 +372,89 @@ def build_scheme_cards(response: "RAGResponse", lang: str = "en") -> list[Scheme
     """
     # Language-specific strings
     if lang == "hi":
-        matched_prefix   = "मिलान:"
         fallback_why     = "आपकी प्रोफ़ाइल से प्रासंगिक"
         fallback_benefit = "योजना दस्तावेज़ देखें"
         fallback_scheme  = "अज्ञात योजना"
+        lbl_age          = "आयु"
+        lbl_income       = "आय सीमा"
+        lbl_caste        = "जाति वर्ग"
+        lbl_occupation   = "व्यवसाय"
+        lbl_state        = "राज्य"
+        lbl_all_india    = "सम्पूर्ण भारत"
+        lbl_years        = "वर्ष"
+        lbl_upto         = "तक"
+        lbl_year         = "प्रतिवर्ष"
     else:
-        matched_prefix   = "Matched:"
         fallback_why     = "Semantically relevant to your profile"
         fallback_benefit = "See scheme document"
         fallback_scheme  = "Unknown Scheme"
+        lbl_age          = "Age"
+        lbl_income       = "Income limit"
+        lbl_caste        = "Caste"
+        lbl_occupation   = "Occupation"
+        lbl_state        = "State"
+        lbl_all_india    = "All India"
+        lbl_years        = "yrs"
+        lbl_upto         = "up to"
+        lbl_year         = "/year"
+
+    def _meta_criteria(meta: dict) -> list[str]:
+        """Build a list of human-readable eligibility criteria from scheme metadata."""
+        criteria = []
+
+        # State / coverage
+        state_val = (meta.get("state") or "").strip()
+        if state_val and state_val.lower() not in ("", "—", "n/a"):
+            display = lbl_all_india if state_val.lower() in ("all india", "pan india", "national") else state_val
+            criteria.append(f"{lbl_state}: {display}")
+
+        # Age range
+        age_min = meta.get("age_min")
+        age_max = meta.get("age_max")
+        if age_min is not None and age_max is not None:
+            criteria.append(f"{lbl_age}: {int(age_min)}–{int(age_max)} {lbl_years}")
+        elif age_min is not None:
+            criteria.append(f"{lbl_age}: {int(age_min)}+ {lbl_years}")
+        elif age_max is not None:
+            criteria.append(f"{lbl_age}: {lbl_upto} {int(age_max)} {lbl_years}")
+
+        # Income
+        income = meta.get("income_limit_annual")
+        if income is not None:
+            try:
+                amt = int(income)
+                formatted = _indian_number(amt)
+                criteria.append(f"{lbl_income}: {formatted}{lbl_year}")
+            except (ValueError, TypeError):
+                criteria.append(f"{lbl_income}: ₹{income}{lbl_year}")
+
+        # Caste categories
+        caste_csv = meta.get("caste_categories_csv") or ""
+        if caste_csv and caste_csv.strip() not in ("", "—"):
+            castes = [c.strip() for c in caste_csv.split(",") if c.strip()]
+            if castes:
+                criteria.append(f"{lbl_caste}: {', '.join(castes)}")
+
+        # Occupation
+        occ_csv = meta.get("occupation_categories_csv") or ""
+        if occ_csv and occ_csv.strip() not in ("", "—"):
+            occs = [o.strip().capitalize() for o in occ_csv.split(",") if o.strip()]
+            if occs:
+                criteria.append(f"{lbl_occupation}: {', '.join(occs)}")
+
+        return criteria
 
     cards = []
     for idx, scheme in enumerate(response.retrieved_schemes, start=1):
         meta = scheme.metadata
         tier_label, _ = _tier(scheme.final_score)
 
-        # Build why_eligible text
-        if scheme.matched_criteria:
-            if lang == "hi":
-                translated = [_translate_criterion_hi(c) for c in scheme.matched_criteria]
-            else:
-                translated = scheme.matched_criteria
-            why = f"{matched_prefix} {', '.join(translated)}"
+        # Build why_eligible from real metadata criteria
+        criteria = _meta_criteria(meta)
+        if criteria:
+            why = " · ".join(criteria)
         else:
+            # Last-resort fallback
             why = fallback_why
 
         # Translate warnings when Hindi requested
@@ -395,7 +484,6 @@ def build_scheme_cards(response: "RAGResponse", lang: str = "en") -> list[Scheme
 
 if __name__ == "__main__":
     import sys
-    from dataclasses import dataclass as dc
 
     # Create a mock response to demonstrate formatting without needing ChromaDB
     from rag_pipeline.step5_rag_chain import RAGResponse, RetrievedScheme

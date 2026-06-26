@@ -1,0 +1,53 @@
+# ── YojanaBot — Render Infrastructure as Code ────────────────────────────────
+# Deploy with: Render Dashboard → New → Blueprint → connect this repo
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: yojanabot
+    runtime: python
+    region: oregon           # Change to: frankfurt, singapore, ohio as needed
+
+    # ── Build & Start ────────────────────────────────────────────────────────
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn scheme_finder.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --log-level info"
+
+    # ── Plan ─────────────────────────────────────────────────────────────────
+    # sentence-transformers needs ~400 MB RAM — free tier (512 MB) is too tight.
+    # Use "starter" ($7/mo) at minimum; "standard" ($25/mo) is recommended.
+    plan: starter
+
+    # ── Environment Variables ────────────────────────────────────────────────
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.4"
+
+      - key: DJANGO_DEBUG
+        value: "False"
+
+      # Auto-generated secure Django secret key — safe to use as-is
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+
+      # !! Set this in the Render dashboard — do NOT hardcode here !!
+      - key: GROQ_API_KEY
+        sync: false
+
+      - key: GROQ_MODEL
+        value: "llama-3.1-8b-instant"
+
+      # Sentence-transformers cache: keep models on the persistent disk
+      - key: TRANSFORMERS_CACHE
+        value: "/opt/render/project/src/data/.cache/huggingface"
+      - key: HF_HOME
+        value: "/opt/render/project/src/data/.cache/huggingface"
+      - key: SENTENCE_TRANSFORMERS_HOME
+        value: "/opt/render/project/src/data/.cache/sentence_transformers"
+
+    # ── Persistent Disk ──────────────────────────────────────────────────────
+    # Mounts at data/ so ChromaDB index + HuggingFace model cache survive redeploys.
+    # 1 GB is sufficient for this project.
+    disk:
+      name: yojanabot-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 2

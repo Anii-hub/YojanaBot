@@ -1,40 +1,11 @@
-"""
-Step 5: RAG pipeline — LangChain + Groq (Llama 3) grounded on ChromaDB scheme chunks.
-
-Design decisions:
-  - The prompt is deliberately strict: the LLM must cite scheme names and
-    source PDFs, and is explicitly forbidden from inventing eligibility criteria.
-  - We pass the raw user profile as structured context alongside retrieved docs
-    so the LLM can explain *why* each scheme matches.
-  - Groq free tier (llama3-8b-8192 or llama3-70b-8192) is used; model is
-    configurable via GROQ_MODEL env var.
-  - Graceful fallback: if Groq is unavailable, return the retrieved chunks as-is.
-
-Usage:
-    from rag_pipeline.step5_rag_chain import run_rag_pipeline, RAGResponse
-    from rag_pipeline.vector_store import SchemeVectorStore
-
-    store = SchemeVectorStore(persist_dir=Path("data/chroma"))
-    profile = {"state": "Uttar Pradesh", "age": 22, ...}
-    response: RAGResponse = run_rag_pipeline(profile, store)
-    print(response.answer_text)
-
-Environment variables required:
-    GROQ_API_KEY  — your Groq API key (https://console.groq.com)
-    GROQ_MODEL    — optional, defaults to "llama3-8b-8192"
-"""
+"""Step 5: grounded RAG answer generation for free-text user descriptions."""
 
 from __future__ import annotations
 
-import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
-
-# ---------------------------------------------------------------------------
-# Try to import LangChain / Groq; provide clear installation hints on failure
-# ---------------------------------------------------------------------------
 
 try:
     from langchain_core.output_parsers import StrOutputParser
@@ -50,85 +21,73 @@ except ImportError:
     SchemeVectorStore = Any  # type: ignore[assignment,misc]
 
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
-
 DEFAULT_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
 DEFAULT_TOP_K = 5
 
-# ── English prompts ──────────────────────────────────────────────────────────
-SYSTEM_PROMPT = """\
-You are an expert Indian government scheme advisor. Your ONLY job is to help \
-citizens understand which government schemes they are eligible for.
+SYSTEM_PROMPT = """
+You are an Indian government scheme advisor. The user has described themselves in natural language. You have been given raw scheme documents. For each scheme that matches, respond in this exact format:
 
-STRICT RULES you must always follow:
-1. Answer ONLY based on the scheme documents provided in the context below.
-2. For every scheme you mention, you MUST cite:
-   a. The exact Scheme Name as it appears in the document.
-   b. The Source PDF URL or Application URL.
-3. NEVER invent, extrapolate, or assume eligibility criteria not present in the context.
-4. If a scheme is not clearly applicable to the user, omit it entirely.
-5. Structure your answer as a numbered list. Each item must include:
-   - Scheme Name (योजना का नाम)
-   - Benefit: what the user receives
-   - Why Eligible: how the user's profile matches the scheme criteria
-   - Apply: the application link from the document
-6. End with a brief note if some schemes could not be confirmed due to incomplete data.
+SCHEME: [exact scheme name]
+MATCH: [High / Partial / Low]
+BENEFIT: [what user receives, from document only]
+WHY IT MATCHES:
+  - [criterion from document]: [how user meets it]
+DOESNT FULLY MATCH:
+  - [any unconfirmed criterion]
+APPLY: [URL from document]
+---
+
+Never invent criteria. Only use what the document says. Omit schemes that clearly do not match.
+"""
+
+SYSTEM_PROMPT_HI = """
+आप एक भारतीय सरकारी योजना सलाहकार हैं। उपयोगकर्ता ने अपने बारे में हिंदी या अंग्रेजी में बताया है। आपको दिए गए योजना दस्तावेज़ों के आधार पर मिलान करने वाली प्रत्येक योजना के लिए ठीक इस प्रारूप में उत्तर देना है:
+
+SCHEME: [योजना का सटीक नाम]
+MATCH: [उच्च / आंशिक / कम]
+BENEFIT: [दस्तावेज़ के अनुसार उपयोगकर्ता को क्या मिलेगा]
+WHY IT MATCHES:
+  - [दस्तावेज़ से मानदंड]: [उपयोगकर्ता इसे कैसे पूरा करता है]
+DOESNT FULLY MATCH:
+  - [कोई अपुष्ट मानदंड]
+APPLY: [दस्तावेज़ से URL]
+---
+
+महत्वपूर्ण निर्देश:
+1. संपूर्ण उत्तर केवल हिंदी में दें — एक भी वाक्य अंग्रेजी में न लिखें।
+2. केवल दस्तावेज़ में लिखी जानकारी का उपयोग करें — कोई भी मानदंड स्वयं न बनाएं।
+3. जो योजनाएं स्पष्ट रूप से मेल नहीं खाती हैं उन्हें छोड़ दें।
+4. आवेदन URL मूल दस्तावेज़ से ही लें।
 """
 
 HUMAN_PROMPT = """\
-## User Profile
-{profile_summary}
+## User Description
+{user_query}
 
 ## Retrieved Scheme Documents
 {context}
 
 ## Task
-Based ONLY on the scheme documents above, list all government schemes this \
-user is eligible for. Follow the strict rules from the system prompt exactly.
-"""
-
-# ── Hindi prompts — used when lang='hi' ──────────────────────────────────────
-# The LLM writes the entire answer in Hindi natively.
-# This gives far better quality than English → post-hoc machine translation.
-SYSTEM_PROMPT_HI = """\
-आप एक विशेषज्ञ भारतीय सरकारी योजना सलाहकार हैं। आपका काम नागरिकों को यह बताना है \
-कि वे किन सरकारी योजनाओं के लिए पात्र हैं।
-
-कड़े नियम जिनका आपको हमेशा पालन करना है:
-1. उत्तर केवल नीचे दिए गए योजना दस्तावेज़ों के आधार पर दें।
-2. हर योजना के लिए आपको अवश्य बताना है:
-   क. योजना का सटीक नाम (जैसा दस्तावेज़ में है)
-   ख. आवेदन लिंक या PDF URL
-3. कभी भी कोई पात्रता मानदंड मत बनाएं जो दस्तावेज़ में नहीं है।
-4. अगर कोई योजना उपयोगकर्ता पर स्पष्ट रूप से लागू नहीं होती तो उसे छोड़ दें।
-5. उत्तर को क्रमांकित सूची के रूप में लिखें। हर योजना में शामिल करें:
-   - **योजना का नाम**
-   - **लाभ**: उपयोगकर्ता को क्या मिलेगा
-   - **पात्रता**: प्रोफ़ाइल के कौन से क्षेत्र योजना की शर्तों से मेल खाते हैं
-   - **आवेदन करें**: दस्तावेज़ से आवेदन लिंक
-6. अंत में संक्षिप्त नोट लिखें यदि कुछ योजनाओं की पुष्टि अपूर्ण डेटा के कारण नहीं हो सकी।
-पूरा उत्तर हिंदी में लिखें।
+Based ONLY on the scheme documents above, list all government schemes this user may match.
 """
 
 HUMAN_PROMPT_HI = """\
-## उपयोगकर्ता की प्रोफ़ाइल
-{profile_summary}
+## उपयोगकर्ता का विवरण
+{user_query}
 
 ## प्राप्त योजना दस्तावेज़
 {context}
 
 ## कार्य
-केवल ऊपर दिए गए योजना दस्तावेज़ों के आधार पर बताएं कि यह उपयोगकर्ता किन \
-सरकारी योजनाओं के लिए पात्र है। सिस्टम प्रॉम्प्ट के सभी नियमों का पालन करें। \
-पूरा उत्तर हिंदी में लिखें।
+ऊपर दिए गए योजना दस्तावेज़ों के आधार पर ही इस उपयोगकर्ता से मेल खाने वाली सभी सरकारी योजनाएं सूचीबद्ध करें।
+
+महत्वपूर्ण:
+- SCHEME, MATCH, BENEFIT, WHY IT MATCHES, DOESNT FULLY MATCH, APPLY — ये फ़ील्ड लेबल अंग्रेजी में रखें।
+- इन फ़ील्ड के बाद सभी मान (values) और विवरण हिंदी में लिखें।
+- एक भी अतिरिक्त वाक्य अंग्रेजी में न लिखें।
+- दस्तावेज़ में न हो ऐसी कोई भी जानकारी न जोड़ें।
 """
 
-
-# ---------------------------------------------------------------------------
-# Dataclass for RAG response
-# ---------------------------------------------------------------------------
 
 @dataclass
 class RetrievedScheme:
@@ -152,234 +111,153 @@ class RAGResponse:
     error: str | None = None
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _profile_to_readable_summary(profile: dict[str, Any]) -> str:
-    lines = [
-        f"- State: {profile.get('state', 'Unknown')}",
-        f"- Age: {profile.get('age', 'Unknown')} years",
-        f"- Gender: {profile.get('gender', 'Unknown')}",
-        f"- Annual Family Income: ₹{profile.get('annual_income', 0):,}",
-        f"- Caste Category: {profile.get('caste_category', 'Unknown')}",
-        f"- Occupation: {profile.get('occupation_type', 'Unknown')}",
-    ]
-    return "\n".join(lines)
-
-
 def _chunks_to_context(schemes: list[RetrievedScheme]) -> str:
     parts = []
     for idx, scheme in enumerate(schemes, start=1):
         meta = scheme.metadata
         parts.append(
             f"--- SCHEME DOCUMENT {idx} ---\n"
+            f"Scheme Name: {scheme.scheme_name}\n"
             f"{scheme.page_content}\n"
             f"[Source PDF: {meta.get('source_pdf_url', 'N/A')}]\n"
-            f"[Application URL: {meta.get('application_url', 'N/A')}]\n"
-            f"[Matched Profile Criteria: {', '.join(scheme.matched_criteria) or 'semantic match'}]\n"
         )
     return "\n".join(parts)
 
 
 def _build_fallback_answer(schemes: list[RetrievedScheme]) -> str:
-    """Used when Groq API is unavailable — return a structured text from metadata."""
     if not schemes:
-        return "No matching schemes found for your profile."
+        return "No matching schemes found for your description."
 
-    lines = ["Based on your profile, here are potentially relevant schemes:\n"]
+    lines = ["Based on your description, here are semantically relevant schemes:\n"]
     for idx, scheme in enumerate(schemes, start=1):
         meta = scheme.metadata
         lines.append(
             f"{idx}. **{scheme.scheme_name}**\n"
-            f"   Benefit: {meta.get('benefit_amount') or 'See scheme document'}\n"
-            f"   Matched: {', '.join(scheme.matched_criteria) or 'Semantic relevance'}\n"
-            f"   Apply: {meta.get('application_url') or meta.get('source_pdf_url', 'N/A')}\n"
+            f"   Match score: {scheme.semantic_score:.0%}\n"
+            f"   Apply/source: {meta.get('application_url') or meta.get('source_pdf_url', 'N/A')}\n"
         )
-    lines.append("\n⚠️  Note: Groq API was unavailable. Results are based on retrieval only, not LLM reasoning.")
+    lines.append("\nNote: Groq API was unavailable. Results are based on semantic retrieval only.")
     return "\n".join(lines)
 
 
 def _raw_results_to_schemes(raw_results: list[dict[str, Any]]) -> list[RetrievedScheme]:
     schemes = []
-    for r in raw_results:
-        meta = r.get("metadata") or {}
+    for result in raw_results:
+        meta = result.get("metadata") or {}
+        score = result.get("semantic_score", 0.0)
         schemes.append(
             RetrievedScheme(
-                scheme_name=meta.get("scheme_name") or r.get("id", "Unknown Scheme"),
-                page_content=r.get("page_content", ""),
+                scheme_name=meta.get("scheme_name") or result.get("id", "Unknown Scheme"),
+                page_content=result.get("page_content", ""),
                 metadata=meta,
-                semantic_score=r.get("semantic_score", 0.0),
-                metadata_score=r.get("metadata_score", 0.0),
-                final_score=r.get("final_score", 0.0),
-                matched_criteria=r.get("matched_criteria", []),
-                eligibility_warnings=r.get("eligibility_warnings", []),
+                semantic_score=score,
+                metadata_score=0.0,
+                final_score=score,
+                matched_criteria=["semantic match"],
+                eligibility_warnings=[],
             )
         )
     return schemes
 
 
-# ---------------------------------------------------------------------------
-# Core RAG chain
-# ---------------------------------------------------------------------------
-
 def _call_groq(
-    profile_summary: str,
+    user_query: str,
     context: str,
     model_name: str = DEFAULT_MODEL,
     lang: str = "en",
 ) -> str:
-    """
-    Build LangChain chain and invoke Groq LLM.
-
-    When lang='hi' the Hindi prompt pair is used so the LLM writes its entire
-    answer in Hindi natively — this produces far better quality than translating
-    English output afterwards with a machine-translation API.
-    """
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        raise EnvironmentError(
-            "GROQ_API_KEY environment variable is not set. "
-            "Get a free key at https://console.groq.com and set it:\n"
-            "  $env:GROQ_API_KEY = 'your-key-here'  (PowerShell)\n"
-            "  export GROQ_API_KEY='your-key-here'   (bash)"
-        )
+        raise EnvironmentError("GROQ_API_KEY environment variable is not set.")
 
     llm = ChatGroq(
         model=model_name,
         api_key=api_key,
-        temperature=0.0,          # deterministic — eligibility advice must be consistent
+        temperature=0.0,
         max_tokens=2048,
         timeout=60,
         max_retries=2,
     )
 
-    # Pick prompt language — Hindi prompt instructs the LLM to write fully in Hindi
-    sys_prompt  = SYSTEM_PROMPT_HI if lang == "hi" else SYSTEM_PROMPT
-    human_prompt = HUMAN_PROMPT_HI  if lang == "hi" else HUMAN_PROMPT
-
     prompt = ChatPromptTemplate.from_messages([
-        ("system", sys_prompt),
-        ("human",  human_prompt),
+        ("system", SYSTEM_PROMPT_HI if lang == "hi" else SYSTEM_PROMPT),
+        ("human", HUMAN_PROMPT_HI if lang == "hi" else HUMAN_PROMPT),
     ])
-
     chain = prompt | llm | StrOutputParser()
-
-    return chain.invoke({
-        "profile_summary": profile_summary,
-        "context": context,
-    })
+    return chain.invoke({"user_query": user_query, "context": context})
 
 
 def run_rag_pipeline(
-    user_profile: dict[str, Any],
-    vector_store: Any,  # SchemeVectorStore
+    user_query: str,
+    vector_store: Any,
     top_k: int = DEFAULT_TOP_K,
     model_name: str = DEFAULT_MODEL,
     lang: str = "en",
 ) -> RAGResponse:
-    """
-    Full RAG pipeline:
-      1. Retrieve top-k scheme chunks from ChromaDB (hybrid retrieval from Step 3).
-      2. Build a strict grounding prompt.
-      3. Call Groq Llama 3 to generate a cited, grounded answer.
-      4. Return a RAGResponse with the answer and all retrieved scheme metadata.
-
-    Args:
-        user_profile:  dict with keys state, age, gender, annual_income,
-                       caste_category, occupation_type.
-        vector_store:  A SchemeVectorStore instance (Step 3).
-        top_k:         Number of scheme chunks to retrieve.
-        model_name:    Groq model identifier.
-
-    Returns:
-        RAGResponse dataclass.
-    """
-    # --- Step 3: Retrieve ---
-    raw_results = vector_store.retrieve_matching_schemes(user_profile, top_k=top_k)
+    raw_results = vector_store.retrieve_matching_schemes(user_query, top_k=top_k)
     schemes = _raw_results_to_schemes(raw_results)
-
-    profile_summary = _profile_to_readable_summary(user_profile)
     context = _chunks_to_context(schemes)
 
-    # --- Step 5: LLM Grounding ---
-    groq_available = _LANGCHAIN_AVAILABLE and bool(os.environ.get("GROQ_API_KEY"))
-
     if not _LANGCHAIN_AVAILABLE:
-        answer = _build_fallback_answer(schemes)
         return RAGResponse(
-            profile=user_profile,
+            profile={"query": user_query},
             retrieved_schemes=schemes,
-            answer_text=answer,
+            answer_text=_build_fallback_answer(schemes),
             model_used="fallback (langchain-groq not installed)",
             groq_available=False,
             error="Install langchain-groq: pip install langchain-groq",
         )
 
     if not os.environ.get("GROQ_API_KEY"):
-        answer = _build_fallback_answer(schemes)
         return RAGResponse(
-            profile=user_profile,
+            profile={"query": user_query},
             retrieved_schemes=schemes,
-            answer_text=answer,
+            answer_text=_build_fallback_answer(schemes),
             model_used="fallback (no GROQ_API_KEY)",
             groq_available=False,
             error="Set GROQ_API_KEY environment variable to enable LLM reasoning.",
         )
 
     try:
-        # Pass lang so the LLM writes natively in Hindi when requested —
-        # no post-hoc machine translation needed for the AI analysis section.
-        answer = _call_groq(profile_summary, context, model_name, lang=lang)
+        answer = _call_groq(user_query, context, model_name, lang=lang)
         return RAGResponse(
-            profile=user_profile,
+            profile={"query": user_query},
             retrieved_schemes=schemes,
             answer_text=answer,
             model_used=model_name,
             groq_available=True,
         )
-    except Exception as exc:  # noqa: BLE001
-        answer = _build_fallback_answer(schemes)
+    except Exception as exc:
         return RAGResponse(
-            profile=user_profile,
+            profile={"query": user_query},
             retrieved_schemes=schemes,
-            answer_text=answer,
+            answer_text=_build_fallback_answer(schemes),
             model_used=model_name,
             groq_available=False,
             error=str(exc),
         )
 
 
-# ---------------------------------------------------------------------------
-# CLI entry-point (for quick testing)
-# ---------------------------------------------------------------------------
-
 def _build_arg_parser():
     import argparse
-    parser = argparse.ArgumentParser(description="Run the RAG pipeline for a given user profile.")
-    parser.add_argument("--profile-json", help="Inline JSON user profile string.")
-    parser.add_argument("--profile-path", help="Path to a JSON user profile file.")
+    parser = argparse.ArgumentParser(description="Run the RAG pipeline for a free-text user description.")
+    parser.add_argument("--query", help="Free-text user description.")
     parser.add_argument("--persist-dir", default="data/chroma", help="ChromaDB directory.")
     parser.add_argument("--top-k", type=int, default=DEFAULT_TOP_K, help="Number of schemes to retrieve.")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Groq model name.")
+    parser.add_argument("--lang", default="en", choices=["en", "hi"])
     return parser
 
 
 def main() -> None:
     from rag_pipeline.vector_store import SchemeVectorStore
 
-    parser = _build_arg_parser()
-    args = parser.parse_args()
-
-    if args.profile_json:
-        profile = json.loads(args.profile_json)
-    elif args.profile_path:
-        profile = json.loads(Path(args.profile_path).read_text(encoding="utf-8-sig"))
-    else:
-        parser.error("Provide --profile-json or --profile-path.")
+    args = _build_arg_parser().parse_args()
+    if not args.query:
+        raise SystemExit("Provide --query.")
 
     store = SchemeVectorStore(persist_dir=Path(args.persist_dir))
-    response = run_rag_pipeline(profile, store, top_k=args.top_k, model_name=args.model)
+    response = run_rag_pipeline(args.query, store, top_k=args.top_k, model_name=args.model, lang=args.lang)
 
     print("\n" + "=" * 60)
     print("RAG PIPELINE RESPONSE")
@@ -387,7 +265,7 @@ def main() -> None:
     print(response.answer_text)
 
     if response.error:
-        print(f"\n⚠️  Warning: {response.error}")
+        print(f"\nWarning: {response.error}")
 
 
 if __name__ == "__main__":

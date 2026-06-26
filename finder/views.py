@@ -1,16 +1,12 @@
-"""
-finder/views.py — Django views for the scheme eligibility finder.
-"""
+"""Django views for the scheme eligibility finder."""
 
 from __future__ import annotations
 
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from .forms import EligibilityForm
 from . import rag_service
 
-# ── Static context data ───────────────────────────────────────────────────
 
 _HOME_STATS = [
     ("⚡", "1500+", "Schemes Covered"),
@@ -20,11 +16,11 @@ _HOME_STATS = [
 
 _HOW_STEPS = [
     (1, "bi-person-fill", "Tell Us About You",
-     "Answer 6 quick questions about your state, age, income, caste, and occupation."),
+     "Describe yourself in your own words, including state, age, income, caste, and occupation if relevant."),
     (2, "bi-search-heart", "AI Searches Schemes",
-     "Our RAG engine searches thousands of central & state government scheme documents semantically."),
+     "Our RAG engine searches government scheme documents semantically."),
     (3, "bi-list-check", "Get Personalised Results",
-     "Receive a ranked list of eligible schemes with benefit details and direct application links."),
+     "Receive a ranked list of matching schemes with benefit details and application links."),
 ]
 
 _CATEGORIES = [
@@ -42,18 +38,6 @@ _CATEGORIES = [
     ("🔧", "Artisans", "#78716C"),
 ]
 
-_INCOME_HINTS = [
-    ("60000", "₹60K"),
-    ("120000", "₹1.2L"),
-    ("200000", "₹2L"),
-    ("500000", "₹5L"),
-    ("1000000", "₹10L"),
-]
-
-
-
-
-# ── Views ─────────────────────────────────────────────────────────────────
 
 def home(request):
     return render(request, "finder/home.html", {
@@ -68,42 +52,35 @@ def home(request):
 @require_http_methods(["GET", "POST"])
 def find(request):
     if request.method == "POST":
-        form = EligibilityForm(request.POST)
-        # lang is a raw radio outside Django form fields — read from POST directly
+        user_query = request.POST.get("query", "").strip()
         lang = request.POST.get("lang", "en")
         if lang not in ("en", "hi"):
             lang = "en"
-
-        if form.is_valid():
-            profile = form.to_profile_dict()
-            request.session["profile"] = profile
-            request.session["lang"] = lang
-            return redirect("finder:results")
-    else:
-        form = EligibilityForm()
-        lang = request.session.get("lang", "en")
+        if not user_query:
+            return render(request, "finder/find.html", {
+                "error": "Please enter your details.",
+                "lang": lang,
+            })
+        request.session["user_query"] = user_query
+        request.session["lang"] = lang
+        return redirect("finder:results")
 
     return render(request, "finder/find.html", {
-        "form": form,
-        "income_hints": _INCOME_HINTS,
-        "lang": lang,
+        "lang": request.session.get("lang", "en"),
     })
 
 
 def results(request):
-    profile = request.session.get("profile")
+    user_query = request.session.get("user_query")
     lang = request.session.get("lang", "en")
 
-    if not profile:
+    if not user_query:
         return redirect("finder:find")
 
-    result = rag_service.find_schemes(profile, lang=lang)
-
-    income = profile.get("annual_income", 0)
-    profile_display = {**profile, "annual_income_fmt": f"₹{income:,}"}
+    result = rag_service.find_schemes(user_query, lang=lang)
 
     return render(request, "finder/results.html", {
-        "profile": profile_display,
+        "user_query": user_query,
         "lang": lang,
         "answer_text": result["answer_text"],
         "cards": result["cards"],

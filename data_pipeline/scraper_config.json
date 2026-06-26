@@ -1,0 +1,13 @@
+{
+  "scrape_targets": [
+    {
+      "name": "myscheme_central",
+      "url": "https://www.myscheme.gov.in/search",
+      "enabled": true
+    }
+  ],
+  "manual_pdf_urls": [],
+  "settings": {
+    "request_delay_seconds": 2
+  }
+}

@@ -77,3 +77,12 @@ htmlcov/
 *.bak
 *.tmp
 results/
+
+# ── Render / deployment ───────────────────────────────────────────────────────
+# HuggingFace model cache (stored on persistent disk, never commit)
+data/.cache/
+
+# Keep deployment files committed
+!build.sh
+!render.yaml
+

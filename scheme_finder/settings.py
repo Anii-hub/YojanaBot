@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ── Render.com — detect hostname for ALLOWED_HOSTS + CSRF ────────────────────
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,7 +22,20 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]
+# Allow localhost in dev; add Render's auto-assigned hostname automatically
+_allowed = ["localhost", "127.0.0.1"]
+if RENDER_EXTERNAL_HOSTNAME:
+    _allowed.append(RENDER_EXTERNAL_HOSTNAME)
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", ",".join(_allowed)).split(",")
+
+# Required for Django 4.x CSRF protection with HTTPS (Render uses HTTPS)
+CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"] if RENDER_EXTERNAL_HOSTNAME else []
+
+# Security settings (only active when DEBUG=False)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # ---------------------------------------------------------------------------
 # Application definition
@@ -59,6 +75,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "finder.context_processors.lang",
             ],
         },
     },
@@ -103,5 +120,16 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
 CHROMA_DIR = BASE_DIR / "data" / "chroma"
 RAG_TOP_K = 5
+
+# ── HuggingFace / sentence-transformers model cache ──────────────────────────
+# On Render, point to the persistent disk so the ~300 MB model is downloaded
+# only once and reused across redeploys.
+_hf_cache = os.environ.get("HF_HOME", str(BASE_DIR / "data" / ".cache" / "huggingface"))
+os.environ.setdefault("HF_HOME", _hf_cache)
+os.environ.setdefault("TRANSFORMERS_CACHE", _hf_cache)
+os.environ.setdefault(
+    "SENTENCE_TRANSFORMERS_HOME",
+    os.environ.get("SENTENCE_TRANSFORMERS_HOME", str(BASE_DIR / "data" / ".cache" / "sentence_transformers")),
+)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

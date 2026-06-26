@@ -40,7 +40,6 @@ from rag_pipeline.step6_formatter import (
     _translate_criterion_hi,
     _translate_warning_hi,
     build_scheme_cards,
-    SchemeCard,
 )
 from finder.rag_service import _tier_to_css, _tier_to_icon
 from evaluation.step8_eval import precision_at_k, _is_match
