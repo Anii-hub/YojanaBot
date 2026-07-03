@@ -9,8 +9,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── Render.com — detect hostname for ALLOWED_HOSTS + CSRF ────────────────────
+# ── Detect environment (Render or Railway) ────────────────────────────────────
 RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "")
+RAILWAY_PUBLIC_DOMAIN = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
+RAILWAY_STATIC_URL = os.environ.get("RAILWAY_STATIC_URL", "")
+
+# Determine production hostname
+PROD_HOSTNAME = RENDER_EXTERNAL_HOSTNAME or RAILWAY_PUBLIC_DOMAIN or RAILWAY_STATIC_URL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,14 +27,18 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-# Allow localhost in dev; add Render's auto-assigned hostname automatically
+# Allow localhost in dev; add production hostname automatically
 _allowed = ["localhost", "127.0.0.1"]
-if RENDER_EXTERNAL_HOSTNAME:
-    _allowed.append(RENDER_EXTERNAL_HOSTNAME)
+if PROD_HOSTNAME:
+    clean_host = PROD_HOSTNAME.replace("https://", "").replace("http://", "")
+    _allowed.append(clean_host)
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", ",".join(_allowed)).split(",")
 
-# Required for Django 4.x CSRF protection with HTTPS (Render uses HTTPS)
-CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"] if RENDER_EXTERNAL_HOSTNAME else []
+# Required for Django 4.x CSRF protection with HTTPS
+CSRF_TRUSTED_ORIGINS = []
+if PROD_HOSTNAME:
+    clean_host = PROD_HOSTNAME.replace("https://", "").replace("http://", "")
+    CSRF_TRUSTED_ORIGINS.append(f"https://{clean_host}")
 
 # Security settings (only active when DEBUG=False)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
