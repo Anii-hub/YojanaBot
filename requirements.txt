@@ -5,7 +5,9 @@ pymupdf==1.24.10
 pydantic==2.9.2
 tqdm==4.66.5
 chromadb==0.4.24
-sentence-transformers==3.3.1
+# v2.7.0 uses transformers~=4.36 which does NOT import torch.distributed.tensor
+# at module level. v3.x pulls in transformers>=4.47 which OOMs on 512 MB free tier.
+sentence-transformers==2.7.0
 numpy==1.26.4
 
 # ── Steps 4–7 (RAG chain, formatting, language support) ───────────────────

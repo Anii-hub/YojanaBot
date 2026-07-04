@@ -71,17 +71,19 @@ def _get_store():
 
 
 def store_ready() -> bool:
-    s = _get_store()
-    if s is None:
+    """Fast non-blocking check — never triggers model import.
+    Returns True only if the store is already initialised in this process.
+    """
+    if _store is None:
         return False
     try:
-        return s.collection.count() > 0
+        return _store.collection.count() > 0
     except Exception:
         return False
 
 
 def store_error() -> str | None:
-    _get_store()
+    """Returns the last error string without triggering model import."""
     return _store_error
 
 
