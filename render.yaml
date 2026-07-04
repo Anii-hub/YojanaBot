@@ -10,7 +10,7 @@ services:
 
     # ── Build & Start ────────────────────────────────────────────────────────
     buildCommand: "./build.sh"
-    startCommand: "gunicorn scheme_finder.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 300 --log-level info"
+    startCommand: "gunicorn scheme_finder.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 300 --log-level info --preload"
 
     # ── Plan ─────────────────────────────────────────────────────────────────
     # Free tier: 512 MB RAM, no persistent disk, spins down after 15 min idle.
@@ -24,7 +24,7 @@ services:
         value: "3.11.4"
 
       - key: DJANGO_DEBUG
-        value: "True"   # TEMP: enable for debugging — revert to False after error is identified
+        value: "False"
 
       # Auto-generated secure Django secret key — safe to use as-is
       - key: DJANGO_SECRET_KEY

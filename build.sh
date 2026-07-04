@@ -9,8 +9,12 @@ echo "  YojanaBot — Build Script"
 echo "============================================================"
 echo ""
 
+# Skip AppConfig.ready() pre-load during build — manage.py commands
+# (migrate, collectstatic, warmup_store) don't need the model loaded.
+export YOJANA_SKIP_PRELOAD=true
+
 # ── 1. Install Python dependencies ──────────────────────────────────────────
-echo "[1/3] Installing Python dependencies..."
+echo "[1/4] Installing Python dependencies..."
 pip install -r requirements.txt
 echo "      Done."
 echo ""
