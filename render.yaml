@@ -24,7 +24,7 @@ services:
         value: "3.11.4"
 
       - key: DJANGO_DEBUG
-        value: "False"
+        value: "True"   # TEMP: enable for debugging — revert to False after error is identified
 
       # Auto-generated secure Django secret key — safe to use as-is
       - key: DJANGO_SECRET_KEY

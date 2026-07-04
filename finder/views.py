@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import logging
+import traceback
+
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from . import rag_service
+
+log = logging.getLogger(__name__)
 
 
 _HOME_STATS = [
@@ -78,7 +83,22 @@ def results(request):
     if not user_query:
         return redirect("finder:find")
 
-    result = rag_service.find_schemes(user_query, lang=lang)
+    try:
+        result = rag_service.find_schemes(user_query, lang=lang)
+    except Exception as exc:
+        tb = traceback.format_exc()
+        log.error("RAG pipeline crashed for query %r: %s\n%s", user_query, exc, tb)
+        return render(request, "finder/results.html", {
+            "user_query": user_query,
+            "lang": lang,
+            "answer_text": None,
+            "cards": [],
+            "model_used": "error",
+            "groq_available": False,
+            "rag_error": f"Internal error: {exc}",
+            "total_schemes": 0,
+            "high_matches": 0,
+        })
 
     return render(request, "finder/results.html", {
         "user_query": user_query,
@@ -91,6 +111,7 @@ def results(request):
         "total_schemes": len(result["cards"]),
         "high_matches": sum(1 for c in result["cards"] if c["tier_class"] == "success"),
     })
+
 
 
 def about(request):
