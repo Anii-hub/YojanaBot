@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
@@ -94,3 +95,13 @@ def results(request):
 
 def about(request):
     return render(request, "finder/about.html")
+
+
+def health_check(request):
+    """Lightweight liveness endpoint used by Render / UptimeRobot.
+    Never triggers model loading — always returns 200 instantly.
+    """
+    return JsonResponse({
+        "status": "ok",
+        "store_ready": rag_service.store_ready(),
+    })

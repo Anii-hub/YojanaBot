@@ -45,3 +45,6 @@ services:
         value: "/tmp/huggingface"
       - key: SENTENCE_TRANSFORMERS_HOME
         value: "/tmp/sentence_transformers"
+
+    # ── Health check — Render waits for this to return 200 before routing traffic
+    healthCheckPath: /health/

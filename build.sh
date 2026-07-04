@@ -22,23 +22,20 @@ echo "      Done."
 echo ""
 
 # ── 3. Apply database migrations ─────────────────────────────────────────────
-echo "[3/3] Applying database migrations..."
+echo "[3/4] Applying database migrations..."
 python manage.py migrate --noinput
 echo "      Done."
 echo ""
 
-# ── NOTE: ChromaDB vector index is NOT built here ────────────────────────────
-# On the free tier there is no persistent disk, so building the index at
-# deploy time would:
-#   (a) waste the ~2-3 min HF model download on every deploy, and
-#   (b) potentially exceed the 15-minute build timeout.
-#
-# Instead, finder/rag_service.py auto-rebuilds the ChromaDB index on the
-# first incoming request (lazy singleton), using the committed file at:
-#   data/processed/scheme_chunks_step2.json
-#
-# This means the very first request after a cold start will be slow (~2-4 min).
-# Subsequent requests within the same instance are fast.
+# ── 4. Pre-warm the vector store ─────────────────────────────────────────────
+# Downloads the sentence-transformers model (~300 MB) and builds the ChromaDB
+# index from data/processed/scheme_chunks_step2.json.
+# Running this at build time avoids the cold-start OOM / 2-4 min delay on the
+# very first user request after a deploy.
+echo "[4/4] Pre-warming vector store (downloads model + builds ChromaDB index)..."
+python manage.py warmup_store || echo "      Warmup failed (non-fatal) - first request may be slow."
+echo "      Done."
+echo ""
 
 echo ""
 echo "============================================================"

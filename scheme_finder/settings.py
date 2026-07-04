@@ -27,18 +27,35 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-# Allow localhost in dev; add production hostname automatically
+# Allow localhost in dev; in production allow all hosts (Render's proxy
+# handles real host validation — restricting ALLOWED_HOSTS here just causes
+# spurious 400/500 errors when the injected RENDER_EXTERNAL_HOSTNAME doesn't
+# match the Host header exactly).
 _allowed = ["localhost", "127.0.0.1"]
 if PROD_HOSTNAME:
     clean_host = PROD_HOSTNAME.replace("https://", "").replace("http://", "")
     _allowed.append(clean_host)
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", ",".join(_allowed)).split(",")
+# In production fall back to ["*"] so Render proxy headers never cause 400s
+if os.environ.get("ALLOWED_HOSTS"):
+    ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
+elif not DEBUG:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = _allowed
 
 # Required for Django 4.x CSRF protection with HTTPS
 CSRF_TRUSTED_ORIGINS = []
 if PROD_HOSTNAME:
     clean_host = PROD_HOSTNAME.replace("https://", "").replace("http://", "")
     CSRF_TRUSTED_ORIGINS.append(f"https://{clean_host}")
+    CSRF_TRUSTED_ORIGINS.append(f"http://{clean_host}")
+# Broad fallback: trust all onrender.com and railway.app origins
+if not CSRF_TRUSTED_ORIGINS and not DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://*.onrender.com",
+        "https://*.railway.app",
+        "https://*.up.railway.app",
+    ]
 
 # Security settings (only active when DEBUG=False)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -119,7 +136,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "finder" / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# CompressedStaticFilesStorage (no manifest) avoids KeyError 500s when a
+# static file referenced in a template doesn't appear in the manifest.
+# Switch back to CompressedManifestStaticFilesStorage once all assets are stable.
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 # ---------------------------------------------------------------------------
 # RAG pipeline settings (read from .env)
@@ -144,3 +164,45 @@ os.environ.setdefault(
 )
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ---------------------------------------------------------------------------
+# Logging — show errors in Render/Railway log stream even with DEBUG=False
+# ---------------------------------------------------------------------------
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO" if DEBUG else "WARNING",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "finder": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+}
