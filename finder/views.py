@@ -126,3 +126,73 @@ def health_check(request):
         "status": "ok",
         "store_ready": rag_service.store_ready(),
     })
+
+
+def debug_info(request):
+    """Detailed diagnostic endpoint — shows exactly what is failing.
+    Remove from urls.py once issue is resolved.
+    """
+    import sys
+    import os
+    import platform
+    info = {}
+
+    # ── System info ────────────────────────────────────────────────────────
+    info["python"] = sys.version
+    info["platform"] = platform.platform()
+
+    # ── Memory ─────────────────────────────────────────────────────────────
+    try:
+        import resource
+        mem_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+        info["memory_mb"] = round(mem_mb, 1)
+    except Exception as e:
+        info["memory_mb"] = f"unavailable ({e})"
+
+    # ── Key env vars ────────────────────────────────────────────────────────
+    info["GROQ_API_KEY_set"] = bool(os.environ.get("GROQ_API_KEY"))
+    info["DJANGO_DEBUG"] = os.environ.get("DJANGO_DEBUG", "not set")
+    info["HF_HOME"] = os.environ.get("HF_HOME", "not set")
+    info["SENTENCE_TRANSFORMERS_HOME"] = os.environ.get("SENTENCE_TRANSFORMERS_HOME", "not set")
+
+    # ── Chroma dir ──────────────────────────────────────────────────────────
+    from django.conf import settings
+    from pathlib import Path
+    chroma_dir = Path(settings.CHROMA_DIR)
+    chunks_path = Path(settings.BASE_DIR) / "data" / "processed" / "scheme_chunks_step2.json"
+    info["chroma_dir"] = str(chroma_dir)
+    info["chroma_dir_exists"] = chroma_dir.exists()
+    info["chroma_files"] = [f.name for f in chroma_dir.rglob("*") if f.is_file()] if chroma_dir.exists() else []
+    info["chunks_file_exists"] = chunks_path.exists()
+    info["chunks_file_size_kb"] = round(chunks_path.stat().st_size / 1024, 1) if chunks_path.exists() else 0
+
+    # ── Store status ────────────────────────────────────────────────────────
+    info["store_ready"] = rag_service.store_ready()
+    info["store_error"] = rag_service.store_error()
+
+    # ── Try importing sentence-transformers ─────────────────────────────────
+    try:
+        import sentence_transformers
+        info["sentence_transformers_version"] = sentence_transformers.__version__
+    except Exception as e:
+        info["sentence_transformers_import_error"] = str(e)
+
+    # ── Try importing chromadb ───────────────────────────────────────────────
+    try:
+        import chromadb
+        info["chromadb_version"] = chromadb.__version__
+    except Exception as e:
+        info["chromadb_import_error"] = str(e)
+
+    # ── Try loading the store (the real test) ──────────────────────────────
+    try:
+        store = rag_service._get_store()
+        if store is None:
+            info["store_load"] = "FAILED: " + (rag_service.store_error() or "unknown")
+        else:
+            info["store_load"] = "OK"
+            info["chunk_count"] = store.collection.count()
+    except Exception as e:
+        info["store_load"] = f"EXCEPTION: {traceback.format_exc()}"
+
+    return JsonResponse(info, json_dumps_params={"indent": 2})
