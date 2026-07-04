@@ -42,25 +42,27 @@ def _get_store():
         try:
             from rag_pipeline.vector_store import SchemeVectorStore
             chroma_dir = Path(settings.CHROMA_DIR)
-            if not chroma_dir.exists():
-                _store_error = (
-                    f"ChromaDB index not found at {chroma_dir}. "
-                    "Run: python -m rag_pipeline.vector_store build "
-                    "--chunks data/processed/scheme_chunks_step2.json"
-                )
-                return None
 
             store = SchemeVectorStore(persist_dir=chroma_dir)
-            count = store.collection.count()
-            if count == 0:
-                _store_error = (
-                    "ChromaDB collection is empty (0 documents). "
-                    "Run: python -m rag_pipeline.vector_store build "
-                    "--chunks data/processed/scheme_chunks_step2.json"
-                )
-                # Still return the store so we can at least query (fallback mode)
+
+            # ── Auto-rebuild on cold start (free tier has no persistent disk) ──
+            # If the collection is empty (fresh ephemeral filesystem after
+            # spin-down), rebuild from the committed chunks JSON automatically.
+            # This takes ~2-4 min on the first request but is self-healing.
+            if store.collection.count() == 0:
+                chunks_path = Path(settings.BASE_DIR) / "data" / "processed" / "scheme_chunks_step2.json"
+                if not chunks_path.exists():
+                    _store_error = (
+                        f"Chunks file not found at {chunks_path}. "
+                        "Ensure data/processed/scheme_chunks_step2.json is committed to the repo."
+                    )
+                    return None
+                # Rebuild blocks this request thread but populates the collection
+                # for all subsequent requests in this instance.
+                store.rebuild_from_chunks(chunks_path)
+
             _store = store
-            _store_error = None if count > 0 else _store_error
+            _store_error = None
         except Exception as exc:
             _store_error = f"Vector store error: {exc}"
             _store = None

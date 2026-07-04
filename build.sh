@@ -10,40 +10,35 @@ echo "============================================================"
 echo ""
 
 # ── 1. Install Python dependencies ──────────────────────────────────────────
-echo "[1/4] Installing Python dependencies..."
+echo "[1/3] Installing Python dependencies..."
 pip install -r requirements.txt
 echo "      Done."
 echo ""
 
 # ── 2. Collect static files (WhiteNoise serves them) ────────────────────────
-echo "[2/4] Collecting static files..."
+echo "[2/3] Collecting static files..."
 python manage.py collectstatic --noinput
 echo "      Done."
 echo ""
 
 # ── 3. Apply database migrations ─────────────────────────────────────────────
-echo "[3/4] Applying database migrations..."
+echo "[3/3] Applying database migrations..."
 python manage.py migrate --noinput
 echo "      Done."
 echo ""
 
-# ── 4. Build ChromaDB vector index ───────────────────────────────────────────
-# The persistent disk is mounted at the project's data/ directory so the index
-# survives redeploys. We only rebuild if the index is missing or empty.
-CHROMA_DIR="data/chroma"
-CHUNKS_FILE="data/processed/scheme_chunks_step2.json"
-
-echo "[4/4] Checking ChromaDB vector index..."
-
-if [ -d "$CHROMA_DIR" ] && [ -n "$(ls -A "$CHROMA_DIR" 2>/dev/null)" ]; then
-    echo "      Index already exists at $CHROMA_DIR — skipping rebuild."
-else
-    echo "      Index not found — building from $CHUNKS_FILE ..."
-    python -m rag_pipeline.vector_store build \
-        --chunks "$CHUNKS_FILE" \
-        --persist-dir "$CHROMA_DIR"
-    echo "      ChromaDB index built successfully."
-fi
+# ── NOTE: ChromaDB vector index is NOT built here ────────────────────────────
+# On the free tier there is no persistent disk, so building the index at
+# deploy time would:
+#   (a) waste the ~2-3 min HF model download on every deploy, and
+#   (b) potentially exceed the 15-minute build timeout.
+#
+# Instead, finder/rag_service.py auto-rebuilds the ChromaDB index on the
+# first incoming request (lazy singleton), using the committed file at:
+#   data/processed/scheme_chunks_step2.json
+#
+# This means the very first request after a cold start will be slow (~2-4 min).
+# Subsequent requests within the same instance are fast.
 
 echo ""
 echo "============================================================"

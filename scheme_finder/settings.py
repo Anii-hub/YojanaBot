@@ -131,14 +131,16 @@ CHROMA_DIR = BASE_DIR / "data" / "chroma"
 RAG_TOP_K = 5
 
 # ── HuggingFace / sentence-transformers model cache ──────────────────────────
-# On Render, point to the persistent disk so the ~300 MB model is downloaded
-# only once and reused across redeploys.
-_hf_cache = os.environ.get("HF_HOME", str(BASE_DIR / "data" / ".cache" / "huggingface"))
+# Default to /tmp so downloads work on ephemeral filesystems (e.g. Render free
+# tier which has no persistent disk). On a paid tier with a persistent disk,
+# override HF_HOME and SENTENCE_TRANSFORMERS_HOME via environment variables
+# (already done in render.yaml for the starter/standard plans).
+_hf_cache = os.environ.get("HF_HOME", "/tmp/huggingface")
 os.environ.setdefault("HF_HOME", _hf_cache)
 os.environ.setdefault("TRANSFORMERS_CACHE", _hf_cache)
 os.environ.setdefault(
     "SENTENCE_TRANSFORMERS_HOME",
-    os.environ.get("SENTENCE_TRANSFORMERS_HOME", str(BASE_DIR / "data" / ".cache" / "sentence_transformers")),
+    os.environ.get("SENTENCE_TRANSFORMERS_HOME", "/tmp/sentence_transformers"),
 )
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
