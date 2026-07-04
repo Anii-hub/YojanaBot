@@ -2,6 +2,7 @@ from django.apps import AppConfig
 import logging
 import os
 import sys
+import threading
 
 log = logging.getLogger(__name__)
 
@@ -11,37 +12,44 @@ class FinderConfig(AppConfig):
     name = 'finder'
 
     def ready(self):
-        """Pre-load the vector store before gunicorn forks workers.
+        """Kick off a background thread to pre-warm the vector store.
 
-        With 'gunicorn --preload', ready() runs in the master process.
-        Workers inherit the loaded _store via Linux copy-on-write fork,
-        so the 400 MB PyTorch model is loaded exactly ONCE instead of
-        once per worker per cold-start request.
+        The thread loads the embedding model + ChromaDB index in the worker
+        process AFTER gunicorn has already bound to the port, so Render's
+        port-scan check succeeds immediately.
 
-        Skipped during manage.py commands (migrate, collectstatic, etc.)
-        to avoid slow startups and memory spikes during the build phase.
+        The _store_lock inside rag_service guarantees that any /results/
+        request arriving before the thread finishes will simply wait at the
+        lock rather than crashing or loading the model a second time.
+
+        Skipped during manage.py commands (migrate, collectstatic, warmup_store)
+        to avoid slow build-phase startups.
         """
-        # Only pre-load under the actual WSGI server, not manage.py commands.
-        # manage.py always passes a sub-command as argv[1].
+        # Skip for manage.py sub-commands (migrate, collectstatic, etc.)
         _is_manage_cmd = (
             len(sys.argv) > 1
             and not sys.argv[0].endswith('gunicorn')
-            and 'wsgi' not in ''.join(sys.argv)
+            and 'wsgi' not in ' '.join(sys.argv)
         )
         if _is_manage_cmd:
             return
 
-        # Also skip if explicitly disabled (useful in CI / testing).
+        # Allow explicit opt-out (e.g. during build or testing)
         if os.environ.get('YOJANA_SKIP_PRELOAD', '').lower() == 'true':
             return
 
-        log.info("[finder.ready] Pre-loading vector store...")
-        try:
-            from finder import rag_service  # noqa: PLC0415
-            store = rag_service._get_store()
-            if store is None:
-                log.warning("[finder.ready] Store pre-load failed: %s", rag_service.store_error())
-            else:
-                log.info("[finder.ready] Store ready — %d chunks.", store.collection.count())
-        except Exception as exc:
-            log.warning("[finder.ready] Store pre-load error (non-fatal): %s", exc)
+        def _load():
+            log.info('[finder.ready] Background preload: loading vector store...')
+            try:
+                from finder import rag_service  # noqa: PLC0415
+                store = rag_service._get_store()
+                if store is None:
+                    log.warning('[finder.ready] Preload failed: %s', rag_service.store_error())
+                else:
+                    log.info('[finder.ready] Preload done — %d chunks ready.', store.collection.count())
+            except Exception as exc:
+                log.warning('[finder.ready] Preload error (non-fatal): %s', exc)
+
+        t = threading.Thread(target=_load, daemon=True, name='store-preload')
+        t.start()
+        log.info('[finder.ready] Store preload thread started.')

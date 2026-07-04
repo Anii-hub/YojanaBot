@@ -16,7 +16,11 @@ from sentence_transformers import SentenceTransformer
 DEFAULT_CHUNKS_PATH = Path("data/processed/scheme_chunks_step2.json")
 DEFAULT_CHROMA_DIR = Path("data/chroma")
 DEFAULT_COLLECTION_NAME = "government_scheme_chunks"
-DEFAULT_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+# paraphrase-multilingual-MiniLM-L6-v2 (6-layer, ~235 MB on disk, ~260 MB RAM)
+# vs the previous L12 variant (~470 MB on disk, ~500 MB RAM).
+# The L6 model is still fully multilingual and handles Hindi queries well.
+# It uses half as many transformer layers so it fits on Render's 512 MB free tier.
+DEFAULT_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L6-v2"
 
 
 def sanitize_chroma_metadata(metadata: dict[str, Any]) -> dict[str, str | int | float | bool]:
