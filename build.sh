@@ -32,11 +32,12 @@ echo "      Done."
 echo ""
 
 # ── 4. Pre-warm the vector store ─────────────────────────────────────────────
-# Downloads the sentence-transformers model (~300 MB) and builds the ChromaDB
-# index from data/processed/scheme_chunks_step2.json.
-# Running this at build time avoids the cold-start OOM / 2-4 min delay on the
-# very first user request after a deploy.
-echo "[4/4] Pre-warming vector store (downloads model + builds ChromaDB index)..."
+# Downloads the sentence-transformers model (~300 MB) and opens the ChromaDB
+# index from data/chroma/ (committed to the repo — no rebuild needed).
+# Unset any HuggingFace token env vars first: a bad/expired token causes a 401
+# on public models. render.yaml env vars only apply at runtime, not build time.
+echo "[4/4] Pre-warming vector store (downloads model + opens ChromaDB index)..."
+unset HF_TOKEN HUGGINGFACE_HUB_TOKEN HUGGING_FACE_HUB_TOKEN 2>/dev/null || true
 python manage.py warmup_store || echo "      Warmup failed (non-fatal) - first request may be slow."
 echo "      Done."
 echo ""

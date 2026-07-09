@@ -42,11 +42,15 @@ def load_chunks(chunks_path: Path) -> list[dict[str, Any]]:
 
 class SentenceTransformerEmbedder:
     def __init__(self, model_name: str = DEFAULT_MODEL_NAME):
-        # use_auth_token=False forces anonymous HF Hub access.
-        # Without this, a bad/expired HF_TOKEN in the environment causes a 401
-        # on public models (HF rejects malformed tokens instead of falling back
-        # to anonymous). paraphrase-multilingual-MiniLM-L6-v2 is fully public.
-        self.model = SentenceTransformer(model_name, use_auth_token=False)
+        # Forcibly remove any HF token env vars before loading the model.
+        # sentence-transformers 2.7.0's use_auth_token=False does NOT propagate
+        # to transformers>=4.45 (where use_auth_token was removed), so a bad
+        # or expired HF_TOKEN in Render's dashboard still causes a 401 on a
+        # fully public model. Clearing the vars here is the only reliable fix.
+        import os
+        for _tok_var in ("HF_TOKEN", "HUGGINGFACE_HUB_TOKEN", "HUGGING_FACE_HUB_TOKEN"):
+            os.environ.pop(_tok_var, None)
+        self.model = SentenceTransformer(model_name)
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         embeddings = self.model.encode(
