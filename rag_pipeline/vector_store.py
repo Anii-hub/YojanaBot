@@ -40,17 +40,46 @@ def load_chunks(chunks_path: Path) -> list[dict[str, Any]]:
     return data
 
 
+def _load_model_anonymously(model_name: str) -> "SentenceTransformer":
+    """Download and load a SentenceTransformer model with guaranteed anonymous access.
+
+    Uses huggingface_hub.snapshot_download(token=False) which is the ONLY
+    reliable way to bypass a bad/expired HF_TOKEN on Render:
+    - os.environ.pop only clears env vars; token files survive
+    - use_auth_token=False doesn't propagate to transformers>=4.45
+    - token=False passed to snapshot_download reaches every layer of
+      huggingface_hub and explicitly sends NO Authorization header.
+
+    The downloaded files are cached to SENTENCE_TRANSFORMERS_HOME so
+    subsequent calls (e.g. after gunicorn worker recycle) load from disk.
+    """
+    import os
+    from pathlib import Path
+
+    cache_dir = os.environ.get(
+        "SENTENCE_TRANSFORMERS_HOME",
+        "/tmp/sentence_transformers",
+    )
+    Path(cache_dir).mkdir(parents=True, exist_ok=True)
+
+    from huggingface_hub import snapshot_download
+
+    local_path = snapshot_download(
+        repo_id=model_name,
+        token=False,          # ← explicit anonymous: ignores env vars, token files, everything
+        cache_dir=cache_dir,
+        # Skip non-PyTorch weights to save disk/RAM on free tier
+        ignore_patterns=[
+            "*.msgpack", "*.h5",
+            "flax_model*", "tf_model*", "rust_model*",
+        ],
+    )
+    return SentenceTransformer(local_path)
+
+
 class SentenceTransformerEmbedder:
     def __init__(self, model_name: str = DEFAULT_MODEL_NAME):
-        # Forcibly remove any HF token env vars before loading the model.
-        # sentence-transformers 2.7.0's use_auth_token=False does NOT propagate
-        # to transformers>=4.45 (where use_auth_token was removed), so a bad
-        # or expired HF_TOKEN in Render's dashboard still causes a 401 on a
-        # fully public model. Clearing the vars here is the only reliable fix.
-        import os
-        for _tok_var in ("HF_TOKEN", "HUGGINGFACE_HUB_TOKEN", "HUGGING_FACE_HUB_TOKEN"):
-            os.environ.pop(_tok_var, None)
-        self.model = SentenceTransformer(model_name)
+        self.model = _load_model_anonymously(model_name)
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         embeddings = self.model.encode(
