@@ -1,0 +1,4 @@
+# This file keeps the data/chroma/ directory tracked by git.
+# The actual ChromaDB binary index is excluded via .gitignore.
+# Run the following to build the index:
+#   python -m rag_pipeline.vector_store build --chunks data/processed/scheme_chunks_step2.json

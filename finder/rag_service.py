@@ -7,6 +7,7 @@ at Django startup (not on every request) and provides a simple search() method.
 
 from __future__ import annotations
 
+import logging
 import os
 import threading
 from pathlib import Path
@@ -18,14 +19,19 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from django.conf import settings
 
+log = logging.getLogger(__name__)
+
 # ---------------------------------------------------------------------------
-# Lazy singleton — expensive to construct (loads SentenceTransformer ~300 MB)
+# Lazy singleton — expensive to construct (loads SentenceTransformer ~235 MB)
 # ---------------------------------------------------------------------------
 
 _store = None
+# RLock is re-entrant safe; timeout on acquire() prevents deadlock if a
+# previous worker was OOM-killed while holding the lock.
 _store_lock = threading.Lock()
 _store_error: str | None = None
 _store_attempted = False          # don't retry on permanent failures
+_LOCK_TIMEOUT = 300               # seconds — matches gunicorn worker timeout
 
 
 def _get_store():
@@ -35,37 +41,61 @@ def _get_store():
     if _store_attempted and _store_error:
         return None
 
-    with _store_lock:
+    # Use a timeout so a SIGKILL-abandoned lock doesn't deadlock the next request.
+    acquired = _store_lock.acquire(timeout=_LOCK_TIMEOUT)
+    if not acquired:
+        log.error("[rag_service] Could not acquire store lock within %ds — another thread may be OOM-killed.", _LOCK_TIMEOUT)
+        return None
+    try:
+        # Double-checked locking — someone may have loaded it while we waited.
         if _store is not None:
             return _store
         _store_attempted = True
         try:
+            log.info("[rag_service] Loading SentenceTransformer + ChromaDB...")
             from rag_pipeline.vector_store import SchemeVectorStore
             chroma_dir = Path(settings.CHROMA_DIR)
 
+            log.info("[rag_service] Opening ChromaDB at %s", chroma_dir)
             store = SchemeVectorStore(persist_dir=chroma_dir)
 
-            # ── Auto-rebuild on cold start (free tier has no persistent disk) ──
-            # If the collection is empty (fresh ephemeral filesystem after
-            # spin-down), rebuild from the committed chunks JSON automatically.
-            # This takes ~2-4 min on the first request but is self-healing.
-            if store.collection.count() == 0:
+            chunk_count = store.collection.count()
+            log.info("[rag_service] ChromaDB opened — %d chunks found.", chunk_count)
+
+            # ── Auto-rebuild only if index is missing ────────────────────────
+            # On Render free tier the data/chroma/ directory is now COMMITTED
+            # to the repo, so this branch should never execute. If it does
+            # (e.g. the index was accidentally removed), it will log a clear
+            # warning rather than silently OOM-killing the worker.
+            if chunk_count == 0:
                 chunks_path = Path(settings.BASE_DIR) / "data" / "processed" / "scheme_chunks_step2.json"
                 if not chunks_path.exists():
                     _store_error = (
                         f"Chunks file not found at {chunks_path}. "
                         "Ensure data/processed/scheme_chunks_step2.json is committed to the repo."
                     )
+                    log.error("[rag_service] %s", _store_error)
                     return None
+                log.warning(
+                    "[rag_service] ChromaDB collection is EMPTY — rebuilding from %s. "
+                    "This will use ~400 MB RAM and may OOM on Render free tier. "
+                    "Commit data/chroma/ to the repo to avoid this.",
+                    chunks_path,
+                )
                 # Rebuild blocks this request thread but populates the collection
                 # for all subsequent requests in this instance.
-                store.rebuild_from_chunks(chunks_path)
+                count = store.rebuild_from_chunks(chunks_path)
+                log.info("[rag_service] Rebuild complete — %d chunks indexed.", count)
 
             _store = store
             _store_error = None
+            log.info("[rag_service] Vector store ready.")
         except Exception as exc:
             _store_error = f"Vector store error: {exc}"
             _store = None
+            log.exception("[rag_service] Failed to load vector store: %s", exc)
+    finally:
+        _store_lock.release()
 
     return _store
 
