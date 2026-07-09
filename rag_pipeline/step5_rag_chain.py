@@ -7,18 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-try:
-    from langchain_core.output_parsers import StrOutputParser
-    from langchain_core.prompts import ChatPromptTemplate
-    from langchain_groq import ChatGroq
-    _LANGCHAIN_AVAILABLE = True
-except ImportError:
-    _LANGCHAIN_AVAILABLE = False
-
-try:
-    from rag_pipeline.vector_store import SchemeVectorStore
-except ImportError:
-    SchemeVectorStore = Any  # type: ignore[assignment,misc]
+SchemeVectorStore = Any  # type: ignore[assignment,misc]
 
 
 DEFAULT_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
@@ -170,21 +159,28 @@ def _call_groq(
     if not api_key:
         raise EnvironmentError("GROQ_API_KEY environment variable is not set.")
 
-    llm = ChatGroq(
+    try:
+        from groq import Groq
+    except ImportError as exc:
+        raise ImportError("Install groq: pip install groq") from exc
+
+    client = Groq(api_key=api_key, timeout=60.0, max_retries=2)
+    completion = client.chat.completions.create(
         model=model_name,
-        api_key=api_key,
         temperature=0.0,
         max_tokens=2048,
-        timeout=60,
-        max_retries=2,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT_HI if lang == "hi" else SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": (HUMAN_PROMPT_HI if lang == "hi" else HUMAN_PROMPT).format(
+                    user_query=user_query,
+                    context=context,
+                ),
+            },
+        ],
     )
-
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", SYSTEM_PROMPT_HI if lang == "hi" else SYSTEM_PROMPT),
-        ("human", HUMAN_PROMPT_HI if lang == "hi" else HUMAN_PROMPT),
-    ])
-    chain = prompt | llm | StrOutputParser()
-    return chain.invoke({"user_query": user_query, "context": context})
+    return completion.choices[0].message.content or ""
 
 
 def run_rag_pipeline(
@@ -197,16 +193,6 @@ def run_rag_pipeline(
     raw_results = vector_store.retrieve_matching_schemes(user_query, top_k=top_k)
     schemes = _raw_results_to_schemes(raw_results)
     context = _chunks_to_context(schemes)
-
-    if not _LANGCHAIN_AVAILABLE:
-        return RAGResponse(
-            profile={"query": user_query},
-            retrieved_schemes=schemes,
-            answer_text=_build_fallback_answer(schemes),
-            model_used="fallback (langchain-groq not installed)",
-            groq_available=False,
-            error="Install langchain-groq: pip install langchain-groq",
-        )
 
     if not os.environ.get("GROQ_API_KEY"):
         return RAGResponse(
