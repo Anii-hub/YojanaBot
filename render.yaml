@@ -46,5 +46,16 @@ services:
       - key: SENTENCE_TRANSFORMERS_HOME
         value: "/tmp/sentence_transformers"
 
+      # Force anonymous HuggingFace Hub downloads.
+      # A bad/expired HF_TOKEN causes 401 on public models — these vars
+      # prevent any implicit token from being sent during model download.
+      - key: HF_HUB_DISABLE_IMPLICIT_TOKEN
+        value: "1"
+      - key: HUGGINGFACE_HUB_VERBOSITY
+        value: "warning"
+      # Suppress fork-safety warning from HF tokenizers under gunicorn
+      - key: TOKENIZERS_PARALLELISM
+        value: "false"
+
     # ── Health check — Render waits for this to return 200 before routing traffic
     healthCheckPath: /health/

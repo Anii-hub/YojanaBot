@@ -42,7 +42,11 @@ def load_chunks(chunks_path: Path) -> list[dict[str, Any]]:
 
 class SentenceTransformerEmbedder:
     def __init__(self, model_name: str = DEFAULT_MODEL_NAME):
-        self.model = SentenceTransformer(model_name)
+        # use_auth_token=False forces anonymous HF Hub access.
+        # Without this, a bad/expired HF_TOKEN in the environment causes a 401
+        # on public models (HF rejects malformed tokens instead of falling back
+        # to anonymous). paraphrase-multilingual-MiniLM-L6-v2 is fully public.
+        self.model = SentenceTransformer(model_name, use_auth_token=False)
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         embeddings = self.model.encode(
