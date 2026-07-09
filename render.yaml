@@ -14,8 +14,8 @@ services:
 
     # ── Plan ─────────────────────────────────────────────────────────────────
     # Free tier: 512 MB RAM, no persistent disk, spins down after 15 min idle.
-    # Cold starts will re-download the HF model (~300 MB) and rebuild the
-    # ChromaDB index from data/processed/scheme_chunks_step2.json (committed).
+    # Use the lightweight JSON retriever by default so form submissions do not
+    # load PyTorch/sentence-transformers inside the web worker.
     plan: free
 
     # ── Environment Variables ────────────────────────────────────────────────
@@ -36,6 +36,11 @@ services:
 
       - key: GROQ_MODEL
         value: "llama-3.1-8b-instant"
+
+      # free-tier safe default. Set to "vector" on a larger instance if you
+      # want ChromaDB + sentence-transformers semantic retrieval.
+      - key: YOJANA_RETRIEVER_MODE
+        value: "lightweight"
 
       # On free tier there is no persistent disk, so we cache to /tmp.
       # This means the model re-downloads on every cold start (~300 MB).

@@ -8,7 +8,10 @@ at Django startup (not on every request) and provides a simple search() method.
 from __future__ import annotations
 
 import logging
+import json
+import math
 import os
+import re
 import threading
 from pathlib import Path
 from typing import Any
@@ -33,6 +36,84 @@ _store_error: str | None = None
 _store_attempted = False          # don't retry on permanent failures
 _LOCK_TIMEOUT = 300               # seconds — matches gunicorn worker timeout
 
+_RETRIEVER_MODE = os.environ.get("YOJANA_RETRIEVER_MODE", "lightweight").lower()
+
+
+class _CountableCollection:
+    def __init__(self, owner: "LightweightSchemeStore"):
+        self._owner = owner
+
+    def count(self) -> int:
+        return len(self._owner.chunks)
+
+
+class LightweightSchemeStore:
+    """Memory-safe retriever for constrained web deployments."""
+
+    _STOPWORDS = {
+        "a", "an", "and", "are", "as", "at", "be", "for", "from", "i", "in",
+        "is", "it", "my", "of", "on", "or", "the", "to", "with", "years",
+        "year", "income", "state", "scheme", "yojana",
+    }
+
+    def __init__(self, chunks_path: Path):
+        self.chunks_path = Path(chunks_path)
+        self.chunks = self._load_chunks()
+        self.collection = _CountableCollection(self)
+
+    def _load_chunks(self) -> list[dict[str, Any]]:
+        if not self.chunks_path.exists():
+            raise FileNotFoundError(f"Chunks file not found at {self.chunks_path}")
+        data = json.loads(self.chunks_path.read_text(encoding="utf-8-sig"))
+        if not isinstance(data, list):
+            raise ValueError("Chunk JSON must be a list.")
+        return data
+
+    @classmethod
+    def _tokens(cls, text: str) -> set[str]:
+        raw_tokens = re.findall(r"[\w]+", text.lower(), flags=re.UNICODE)
+        return {token for token in raw_tokens if len(token) > 1 and token not in cls._STOPWORDS}
+
+    @staticmethod
+    def _metadata_text(meta: dict[str, Any]) -> str:
+        keys = (
+            "scheme_name", "state", "benefit_amount", "benefit_text",
+            "caste_categories_csv", "occupation_categories_csv",
+            "application_url", "source_pdf_url",
+        )
+        return " ".join(str(meta.get(key) or "") for key in keys)
+
+    def retrieve_matching_schemes(self, user_query: str, top_k: int = 5) -> list[dict[str, Any]]:
+        query_tokens = self._tokens(user_query)
+        if not query_tokens:
+            return []
+
+        scored: list[dict[str, Any]] = []
+        for chunk in self.chunks:
+            meta = chunk.get("metadata") or {}
+            content = str(chunk.get("page_content") or "")
+            doc_tokens = self._tokens(f"{content} {self._metadata_text(meta)}")
+            if not doc_tokens:
+                continue
+
+            overlap = query_tokens & doc_tokens
+            if not overlap:
+                continue
+
+            coverage = len(overlap) / len(query_tokens)
+            specificity = len(overlap) / math.sqrt(len(doc_tokens))
+            score = min(0.95, (0.75 * coverage) + (0.25 * specificity))
+            scored.append({
+                "id": chunk.get("id") or meta.get("scheme_name") or "unknown",
+                "page_content": content,
+                "metadata": meta,
+                "distance": round(1.0 - score, 4),
+                "semantic_score": round(score, 4),
+            })
+
+        scored.sort(key=lambda item: item["semantic_score"], reverse=True)
+        return scored[:top_k]
+
 
 def _get_store():
     global _store, _store_error, _store_attempted
@@ -52,6 +133,15 @@ def _get_store():
             return _store
         _store_attempted = True
         try:
+            chunks_path = Path(settings.BASE_DIR) / "data" / "processed" / "scheme_chunks_step2.json"
+            if _RETRIEVER_MODE not in {"vector", "chroma"}:
+                log.info("[rag_service] Loading lightweight JSON retriever from %s", chunks_path)
+                store = LightweightSchemeStore(chunks_path)
+                _store = store
+                _store_error = None
+                log.info("[rag_service] Lightweight retriever ready - %d chunks loaded.", store.collection.count())
+                return _store
+
             log.info("[rag_service] Loading SentenceTransformer + ChromaDB...")
             from rag_pipeline.vector_store import SchemeVectorStore
             chroma_dir = Path(settings.CHROMA_DIR)

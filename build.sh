@@ -36,7 +36,7 @@ echo ""
 # index from data/chroma/ (committed to the repo — no rebuild needed).
 # Unset any HuggingFace token env vars first: a bad/expired token causes a 401
 # on public models. render.yaml env vars only apply at runtime, not build time.
-echo "[4/4] Pre-warming vector store (downloads model + opens ChromaDB index)..."
+echo "[4/4] Pre-warming retriever..."
 unset HF_TOKEN HUGGINGFACE_HUB_TOKEN HUGGING_FACE_HUB_TOKEN 2>/dev/null || true
 python manage.py warmup_store || echo "      Warmup failed (non-fatal) - first request may be slow."
 echo "      Done."

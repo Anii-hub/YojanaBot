@@ -1,8 +1,8 @@
 """
 finder/management/commands/warmup_store.py
 
-Pre-warms the vector store during Render build phase so the first user
-request does not have to wait 2-4 minutes for model download + index build.
+Pre-warms the configured retriever during Render build phase so the first
+user request does not pay initialization cost.
 
 Called automatically from build.sh:
     python manage.py warmup_store
@@ -16,14 +16,14 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = "Pre-warm the ChromaDB vector store and download the embedding model."
+    help = "Pre-warm the configured scheme retriever."
 
     def handle(self, *args, **options):
         self.stdout.write("=" * 60)
-        self.stdout.write("  YojanaBot - Vector Store Warmup")
+        self.stdout.write("  YojanaBot - Retriever Warmup")
         self.stdout.write("=" * 60)
         start = time.time()
-        self.stdout.write("[warmup] Loading vector store (may take 2-4 min on first run)...")
+        self.stdout.write("[warmup] Loading configured retriever...")
 
         try:
             from finder import rag_service  # noqa: PLC0415
